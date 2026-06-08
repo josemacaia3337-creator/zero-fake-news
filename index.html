@@ -1,199 +1,106 @@
 <!DOCTYPE html>
-<html lang="pt-AO">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zero Fake News | Dashboard de Credibilidade</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Fake News - Portal de Credibilidade de Angola</title>
+    <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="dashboard-sidebar" aria-label="Dashboard Zero Fake News">
-      <a class="brand brand--sidebar" href="#top" aria-label="Página inicial Zero Fake News">
-        <span class="brand__mark">ZFN</span>
-        <span>
-          Zero Fake News
-          <small>Monitor de credibilidade</small>
-        </span>
-      </a>
 
-      <section class="sidebar-card metric-card" aria-labelledby="total-analyses-title">
-        <p class="eyebrow">Dashboard</p>
-        <h2 id="total-analyses-title">Total de análises</h2>
-        <strong>12 486</strong>
-        <span>simulação acumulada do MVP</span>
-      </section>
-
-      <nav class="sidebar-card history-card" aria-labelledby="history-title">
-        <div class="history-card__header">
-          <p class="eyebrow">Histórico</p>
-          <h2 id="history-title">Análises recentes</h2>
-        </div>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre subsídio viral">
-          <span class="history-item__status history-item__status--danger"></span>
-          <span>
-            Subsídio viral no WhatsApp
-            <small>Muito baixa · há 8 min</small>
-          </span>
-        </a>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre comunicado público">
-          <span class="history-item__status history-item__status--success"></span>
-          <span>
-            Comunicado institucional
-            <small>Alta · há 22 min</small>
-          </span>
-        </a>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre alerta de saúde">
-          <span class="history-item__status history-item__status--warning"></span>
-          <span>
-            Alerta de saúde sem fonte
-            <small>Baixa · hoje</small>
-          </span>
-        </a>
-      </nav>
-
-      <a class="sidebar-cta" href="#criteria">Ver critérios oficiais</a>
-    </aside>
-
-    <div class="page-content">
-      <header class="hero" id="top">
-        <nav class="topbar" aria-label="Navegação principal">
-          <a class="brand" href="#top" aria-label="Página inicial Zero Fake News">
-            <span class="brand__mark">ZFN</span>
-            <span>Zero Fake News</span>
-          </a>
-          <div class="topbar__links">
-            <a class="topbar__link" href="#analysis">Analisar notícia</a>
-            <a class="topbar__link" href="#diagnostics">Diagnóstico</a>
-          </div>
-        </nav>
-
-        <section class="hero__content">
-          <p class="eyebrow">MVP para Angola</p>
-          <h1>Centro profissional de análise contra desinformação.</h1>
-          <p class="hero__text">
-            Simule uma avaliação de credibilidade com pontuação de 0 a 100,
-            classificação oficial e diagnóstico separado entre sinais de risco e sinais positivos.
-          </p>
-          <div class="hero__actions">
-            <a class="button button--primary" href="#analysis">Começar análise</a>
-            <a class="button button--ghost" href="#criteria">Ver escala oficial</a>
-          </div>
-        </section>
-      </header>
-
-      <main>
-        <section class="panel analysis" id="analysis" aria-labelledby="analysis-title">
-          <div class="section-heading">
-            <p class="eyebrow">Análise rápida</p>
-            <h2 id="analysis-title">Cole o texto da notícia</h2>
-            <p>
-              O resultado é uma simulação educativa. Confirme sempre com fontes oficiais,
-              órgãos de comunicação credíveis e verificadores independentes.
-            </p>
-          </div>
-
-          <form class="analysis-form" id="analysisForm">
-            <label for="newsInput">Texto para análise</label>
-            <textarea
-              id="newsInput"
-              name="newsInput"
-              rows="10"
-              minlength="30"
-              placeholder="Ex.: O Governo anunciou uma nova medida..."
-              required
-            ></textarea>
-            <div class="form-actions">
-              <button class="button button--primary" type="submit">Verificar notícia</button>
-              <button class="button button--secondary" type="button" id="clearButton">Limpar</button>
+    <div class="app-container" style="display: flex; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0;">
+        
+        <aside class="sidebar" style="width: 320px; background-color: #1e293b; color: #fff; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #cbd5e1;">
+            <div class="brand" style="margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
+                <h2 style="margin: 0; color: #38bdf8; font-size: 22px;">Zero Fake News</h2>
+                <small style="color: #94a3b8;">Plataforma de Utilidade Pública</small>
             </div>
-          </form>
 
-          <aside class="result-card" id="resultCard" aria-live="polite" aria-label="Área de resultados da verificação">
-            <div class="result-card__empty">
-              <span class="result-card__icon" aria-hidden="true">🛡️</span>
-              <h3>Resultado aparecerá aqui</h3>
-              <p>Ao clicar em verificar, verá o score de 0 a 100, a barra de progresso e a classificação de confiabilidade correspondente.</p>
+            <div class="stats-box" style="background-color: #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                    <div id="totalAnalysesCount" style="font-size: 24px; font-weight: bold; color: #38bdf8;">3</div>
+                    <small style="color: #cbd5e1; font-size: 11px;">Análises Totais</small>
+                </div>
+                <div style="border-left: 1px solid #475569;"></div>
+                <div>
+                    <div id="averageCredibility" style="font-size: 24px; font-weight: bold; color: #34d399;">44/100</div>
+                    <small style="color: #cbd5e1; font-size: 11px;">Média Score</small>
+                </div>
             </div>
-          </aside>
-        </section>
 
-        <section class="classification-board" id="criteria" aria-labelledby="criteria-title">
-          <div class="section-heading section-heading--center">
-            <p class="eyebrow">Escala oficial</p>
-            <h2 id="criteria-title">Classificações de confiabilidade</h2>
-            <p>O score é apresentado numa escala de 0 a 100 para apoiar decisões rápidas antes da partilha.</p>
-          </div>
+            <div class="search-box" style="margin-bottom: 15px;">
+                <input type="text" id="searchHistory" placeholder="Pesquisar análises passadas..." style="width: 100%; padding: 10px; border-radius: 6px; border: none; background-color: #334155; color: #fff; box-sizing: border-box;">
+            </div>
 
-          <div class="scale-grid" aria-label="Classificações oficiais de confiabilidade">
-            <article class="scale-card scale-card--high">
-              <span>81–100</span>
-              <h3>Alta Confiabilidade</h3>
-              <p>Conteúdo com fontes, contexto, datas e baixo risco de manipulação.</p>
-            </article>
-            <article class="scale-card scale-card--medium">
-              <span>61–80</span>
-              <h3>Média Confiabilidade</h3>
-              <p>Há bons sinais, mas ainda existem pontos que exigem confirmação independente.</p>
-            </article>
-            <article class="scale-card scale-card--low">
-              <span>31–60</span>
-              <h3>Baixa Confiabilidade</h3>
-              <p>O texto apresenta lacunas relevantes ou linguagem que reduz a confiança.</p>
-            </article>
-            <article class="scale-card scale-card--critical">
-              <span>0–30</span>
-              <h3>Muito Baixa Confiabilidade</h3>
-              <p>Alta probabilidade de rumor, falta de fontes ou apelos virais suspeitos.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="diagnostics" id="diagnostics" aria-labelledby="diagnostics-title">
-          <div class="section-heading section-heading--center">
-            <p class="eyebrow">Diagnóstico</p>
-            <h2 id="diagnostics-title">Leitura separada dos sinais encontrados</h2>
-          </div>
-
-          <div class="diagnostics-grid">
-            <article class="diagnostic-card diagnostic-card--risk">
-              <div class="diagnostic-card__icon" aria-hidden="true">⚠️</div>
-              <div>
-                <p class="eyebrow">Risco detetado</p>
-                <h3>Sinais de Desinformação Detetados</h3>
-                <ul>
-                  <li><strong>Sensacionalismo:</strong> urgência extrema, choque, medo ou chamadas para partilha imediata.</li>
-                  <li><strong>Falta de fontes:</strong> ausência de instituição, autor, data, ligação ou documento verificável.</li>
-                  <li><strong>Promessas suspeitas:</strong> prémios, subsídios ou benefícios sem canal oficial confirmado.</li>
+            <h4 style="margin: 10px 0; color: #94a3b8; font-size: 14px; text-transform: uppercase;">Histórico Recente</h4>
+            <ul id="historyList" style="padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #0f172a; border-radius: 6px;">
                 </ul>
-              </div>
-            </article>
+        </aside>
 
-            <article class="diagnostic-card diagnostic-card--positive">
-              <div class="diagnostic-card__icon" aria-hidden="true">✅</div>
-              <div>
-                <p class="eyebrow">Confiança</p>
-                <h3>Sinais Positivos Encontrados</h3>
-                <ul>
-                  <li><strong>Fontes identificáveis:</strong> referências a órgãos oficiais, meios credíveis ou relatórios.</li>
-                  <li><strong>Contexto suficiente:</strong> datas, locais, entidades e explicações verificáveis.</li>
-                  <li><strong>Linguagem neutra:</strong> informação apresentada sem alarmismo nem pressão para viralizar.</li>
-                </ul>
-              </div>
-            </article>
-          </div>
-        </section>
-      </main>
+        <main class="main-content" style="flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: 900px; margin: 0 auto;">
+            
+            <header style="margin-bottom: 30px;">
+                <h1 style="color: #0f172a; margin: 0 0 10px 0; font-size: 28px;">Verificador de Integridade de Conteúdo</h1>
+                <p style="color: #64748b; margin: 0;">Cole o texto de mensagens de redes sociais ou links suspeitos para auditoria analítica instantânea.</p>
+            </header>
 
-      <footer class="footer">
-        <p>Zero Fake News — protótipo inicial para literacia mediática e verificação de informação.</p>
-      </footer>
+            <section class="input-section" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                <form id="analysisForm">
+                    <label for="newsInput" style="display: block; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Texto da Notícia ou Mensagem:</label>
+                    <textarea id="newsInput" rows="6" placeholder="Exemplo: Cole o boato sobre bónus do governo ou vagas de emprego suspeitas aqui..." style="width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; resize: vertical; box-sizing: border-box; margin-bottom: 15px;"></textarea>
+                    
+                    <button type="submit" style="background-color: #0284c7; color: #fff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; width: 100%;">
+                        Verificar Autenticidade
+                    </button>
+                </form>
+            </section>
+
+            <div id="loadingSpinner" class="loading" style="display: none; text-align: center; margin: 30px 0;">
+                <div class="spinner" style="border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #0284c7; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                <p style="color: #0284c7; font-weight: bold; margin-top: 10px;">A processar heurísticas de inteligência e base de conhecimento...</p>
+            </div>
+
+            <section id="resultCard" class="result-section" style="display: none; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-top: 30px;">
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                    <div>
+                        <h3 style="margin: 0; color: #0f172a; font-size: 20px;">Resultado da Auditoria</h3>
+                        <span id="levelBadge" style="display: inline-block; padding: 6px 12px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: bold; margin-top: 5px;">Análise Concluída</span>
+                    </div>
+                    <div id="scoreValue" style="font-size: 32px; font-weight: bold; color: #1e293b;">--/100</div>
+                </div>
+
+                <div style="background-color: #e2e8f0; border-radius: 10px; height: 12px; width: 100%; margin-bottom: 25px; overflow: hidden;">
+                    <div id="progressBar" style="width: 0%; height: 100%; background-color: #cbd5e1; transition: width 0.5s ease;"></div>
+                </div>
+
+                <div style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-left: 4px solid #0284c7; border-radius: 0 4px 4px 0;">
+                    <strong style="display: block; color: #0f172a; margin-bottom: 5px;">Explicação da Análise:</strong>
+                    <p id="explanationText" style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;"></p>
+                </div>
+
+                <div class="diagnostics-grid" style="display: flex; gap: 20px;">
+                    <div style="flex: 1; background: #fff5f5; border: 1px solid #feb2b2; padding: 15px; border-radius: 6px;">
+                        <h4 style="margin: 0 0 10px 0; color: #9b2c2c; font-size: 15px;">🚨 Sinais de Desinformação</h4>
+                        <ul id="negativeList" style="padding-left: 0; margin: 0; font-size: 13px; line-height: 1.6;">
+                            </ul>
+                    </div>
+                    <div style="flex: 1; background: #f0fff4; border: 1px solid #9ae6b4; padding: 15px; border-radius: 6px;">
+                        <h4 style="margin: 0 0 10px 0; color: #22543d; font-size: 15px;">🛡️ Indicadores Positivos</h4>
+                        <ul id="positiveList" style="padding-left: 0; margin: 0; font-size: 13px; line-height: 1.6;">
+                            </ul>
+                    </div>
+                </div>
+
+            </section>
+        </main>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </body>
 </html>
