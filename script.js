@@ -144,39 +144,45 @@ function buildCriterion(label, status, detail) {
 }
 
 function classifyScore(score, suspiciousMatches = []) {
-  if (suspiciousMatches.length > 0) {
+  if (suspiciousMatches.length > 0 || score <= 30) {
     return {
       badgeClass: "badge--rumor",
-      toneClass: "result-summary--rumor",
-      label: "[Falso / Rumor]",
-      message: buildSuspiciousExplanation(suspiciousMatches),
-      isSuspiciousRumor: true
+      toneClass: "result-summary--very-low",
+      label: "Muito Baixa Confiabilidade",
+      range: "0–30 pontos",
+      message: suspiciousMatches.length > 0
+        ? buildSuspiciousExplanation(suspiciousMatches)
+        : "O conteúdo tem poucos elementos verificáveis ou usa linguagem suspeita. Evite partilhar sem confirmação.",
+      isSuspiciousRumor: suspiciousMatches.length > 0
     };
   }
 
-  if (score >= 72) {
+  if (score <= 60) {
     return {
-      badgeClass: "badge--success",
-      toneClass: "result-summary--verified",
-      label: "[Verificado]",
-      message: "O texto apresenta vários sinais verificáveis, mas ainda deve ser confirmado em fontes independentes."
+      badgeClass: "badge--low",
+      toneClass: "result-summary--low",
+      label: "Baixa Confiabilidade",
+      range: "31–60 pontos",
+      message: "Há lacunas relevantes. Confirme origem, data, contexto e entidades citadas antes de partilhar."
     };
   }
 
-  if (score >= 45) {
+  if (score <= 80) {
     return {
-      badgeClass: "badge--warning",
-      toneClass: "result-summary--inconclusive",
-      label: "[Inconclusivo]",
-      message: "Há sinais úteis, mas também lacunas. Procure confirmar origem, data e contexto antes de partilhar."
+      badgeClass: "badge--medium",
+      toneClass: "result-summary--medium",
+      label: "Média Confiabilidade",
+      range: "61–80 pontos",
+      message: "O texto apresenta sinais úteis, mas ainda deve ser confirmado em fontes independentes."
     };
   }
 
   return {
-    badgeClass: "badge--danger",
-    toneClass: "result-summary--rumor",
-    label: "[Falso / Rumor]",
-    message: "O conteúdo tem poucos elementos verificáveis ou usa linguagem suspeita. Evite partilhar sem confirmação."
+    badgeClass: "badge--success",
+    toneClass: "result-summary--high",
+    label: "Alta Confiabilidade",
+    range: "81–100 pontos",
+    message: "O texto apresenta vários sinais verificáveis, com fontes, contexto e linguagem mais neutra."
   };
 }
 
@@ -195,8 +201,9 @@ function analyzeNews(rawText) {
       ],
       classification: {
         badgeClass: "badge--rumor",
-        toneClass: "result-summary--rumor",
-        label: "[Falso / Rumor]",
+        toneClass: "result-summary--very-low",
+        label: "Muito Baixa Confiabilidade",
+        range: "0–30 pontos",
         message: `${knownRumorNote} ${knownRumor.explanation}`,
         isKnownRumor: true,
         knownRumorTitle: knownRumor.title
@@ -286,6 +293,30 @@ function analyzeNews(rawText) {
   };
 }
 
+function buildDynamicDiagnostics(analysis) {
+  const riskItems = [];
+  const positiveItems = [];
+
+  if (analysis.suspiciousMatches.length > 0) {
+    riskItems.push(`Sensacionalismo ou padrões virais: ${analysis.suspiciousMatches.map((item) => item.label).join(", ")}.`);
+  }
+
+  if (analysis.score <= 60) {
+    riskItems.push("Falta de fontes, contexto ou termos verificáveis pode reduzir a confiança da análise.");
+  }
+
+  if (analysis.score > 60) {
+    positiveItems.push("O conteúdo contém sinais verificáveis suficientes para uma leitura preliminar mais segura.");
+  }
+
+  positiveItems.push("Use a pontuação como triagem e confirme em canais oficiais antes de partilhar.");
+
+  return {
+    risks: riskItems.length > 0 ? riskItems : ["Nenhum padrão crítico de desinformação foi destacado pela simulação."],
+    positives: positiveItems
+  };
+}
+
 function renderResult(analysis) {
   const suspiciousList = analysis.suspiciousMatches.length > 0
     ? `<div class="rumor-alert" role="alert" aria-live="polite">
@@ -294,18 +325,41 @@ function renderResult(analysis) {
       </div>`
     : "";
 
+  const diagnostics = buildDynamicDiagnostics(analysis);
+
   resultCard.innerHTML = `
     <div class="result-summary ${analysis.classification.toneClass || ""}">
-      <span class="badge ${analysis.classification.badgeClass}">${analysis.classification.label}</span>
+      <div class="result-header">
+        <span class="badge ${analysis.classification.badgeClass}">${analysis.classification.label}</span>
+        <span class="score__label">Score 0–100</span>
+      </div>
       ${suspiciousList}
       <div class="score" aria-label="Pontuação de credibilidade ${analysis.score} de 100">
         <span class="score__value">${analysis.score}</span>
         <span>/100</span>
       </div>
+      <div class="progress-track" aria-hidden="true">
+        <span class="progress-fill" style="--score-width: ${analysis.score}%;"></span>
+      </div>
+      <div class="classification-label">
+        <strong>${analysis.classification.label}</strong>
+        <span>${analysis.classification.range}</span>
+      </div>
       <p>${analysis.classification.message}</p>
-      <ul class="check-list">
-        ${analysis.criteria.join("")}
-      </ul>
+      <div class="result-diagnostics" aria-label="Diagnóstico resumido da análise">
+        <h4>Sinais de Desinformação Detetados</h4>
+        <ul class="check-list">
+          ${diagnostics.risks.map((item) => `<li><strong>⚠️ Risco:</strong> ${item}</li>`).join("")}
+        </ul>
+        <h4>Sinais Positivos Encontrados</h4>
+        <ul class="check-list">
+          ${diagnostics.positives.map((item) => `<li><strong>✅ Positivo:</strong> ${item}</li>`).join("")}
+        </ul>
+        <h4>Critérios avaliados</h4>
+        <ul class="check-list">
+          ${analysis.criteria.join("")}
+        </ul>
+      </div>
     </div>
   `;
 }
@@ -315,7 +369,7 @@ function renderEmptyResult() {
     <div class="result-card__empty">
       <span class="result-card__icon" aria-hidden="true">🛡️</span>
       <h3>Resultado aparecerá aqui</h3>
-      <p>Ao clicar em verificar, verá uma caixa clara: vermelho para falso/rumor, amarelo ou laranja para inconclusivo e verde para verificado.</p>
+      <p>Ao clicar em verificar, verá o score de 0 a 100, a barra de progresso e a classificação de confiabilidade correspondente.</p>
     </div>
   `;
 }
@@ -328,8 +382,8 @@ analysisForm.addEventListener("submit", (event) => {
 
   if (!knownRumor && text.length < 30) {
     resultCard.innerHTML = `
-      <div class="result-summary result-summary--inconclusive">
-        <span class="badge badge--warning">[Inconclusivo]</span>
+      <div class="result-summary result-summary--low">
+        <span class="badge badge--low">Baixa Confiabilidade</span>
         <h3>Adicione mais informação</h3>
         <p>Para uma simulação útil, insira pelo menos 30 caracteres com contexto da notícia.</p>
       </div>
