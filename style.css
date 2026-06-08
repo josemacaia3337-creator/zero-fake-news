@@ -309,6 +309,32 @@ textarea:focus {
   background: #fee4e2;
 }
 
+.badge--rumor {
+  color: #ffffff;
+  background: var(--color-danger);
+  box-shadow: 0 10px 24px rgba(180, 35, 24, 0.28);
+}
+
+.result-summary--rumor {
+  align-content: start;
+}
+
+.rumor-alert {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 2px solid var(--color-danger);
+  border-radius: 18px;
+  color: #7a271a;
+  background: linear-gradient(135deg, #fff1f0 0%, #fee4e2 100%);
+  box-shadow: 0 14px 32px rgba(180, 35, 24, 0.16);
+}
+
+.rumor-alert strong {
+  color: var(--color-danger);
+  font-size: 1.02rem;
+}
+
 .check-list {
   display: grid;
   gap: 10px;
