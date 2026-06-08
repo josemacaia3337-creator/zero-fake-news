@@ -118,6 +118,7 @@ function classifyScore(score, suspiciousMatches = []) {
   if (suspiciousMatches.length > 0) {
     return {
       badgeClass: "badge--rumor",
+      toneClass: "result-summary--rumor",
       label: "[Falso / Rumor]",
       message: buildSuspiciousExplanation(suspiciousMatches),
       isSuspiciousRumor: true
@@ -127,7 +128,8 @@ function classifyScore(score, suspiciousMatches = []) {
   if (score >= 72) {
     return {
       badgeClass: "badge--success",
-      label: "Credibilidade moderada/alta",
+      toneClass: "result-summary--verified",
+      label: "[Verificado]",
       message: "O texto apresenta vários sinais verificáveis, mas ainda deve ser confirmado em fontes independentes."
     };
   }
@@ -135,14 +137,16 @@ function classifyScore(score, suspiciousMatches = []) {
   if (score >= 45) {
     return {
       badgeClass: "badge--warning",
-      label: "Credibilidade incerta",
+      toneClass: "result-summary--inconclusive",
+      label: "[Inconclusivo]",
       message: "Há sinais úteis, mas também lacunas. Procure confirmar origem, data e contexto antes de partilhar."
     };
   }
 
   return {
     badgeClass: "badge--danger",
-    label: "Alto risco de desinformação",
+    toneClass: "result-summary--rumor",
+    label: "[Falso / Rumor]",
     message: "O conteúdo tem poucos elementos verificáveis ou usa linguagem suspeita. Evite partilhar sem confirmação."
   };
 }
@@ -238,7 +242,7 @@ function renderResult(analysis) {
     : "";
 
   resultCard.innerHTML = `
-    <div class="result-summary ${analysis.classification.isSuspiciousRumor ? "result-summary--rumor" : ""}">
+    <div class="result-summary ${analysis.classification.toneClass || ""}">
       <span class="badge ${analysis.classification.badgeClass}">${analysis.classification.label}</span>
       ${suspiciousList}
       <div class="score" aria-label="Pontuação de credibilidade ${analysis.score} de 100">
@@ -258,7 +262,7 @@ function renderEmptyResult() {
     <div class="result-card__empty">
       <span class="result-card__icon" aria-hidden="true">🛡️</span>
       <h3>Resultado aparecerá aqui</h3>
-      <p>Insira uma notícia para receber uma pontuação e recomendações de validação.</p>
+      <p>Ao clicar em verificar, verá uma caixa clara: vermelho para falso/rumor, amarelo ou laranja para inconclusivo e verde para verificado.</p>
     </div>
   `;
 }
@@ -269,8 +273,8 @@ analysisForm.addEventListener("submit", (event) => {
   const text = newsInput.value.trim();
   if (text.length < 30) {
     resultCard.innerHTML = `
-      <div class="result-summary">
-        <span class="badge badge--danger">Texto insuficiente</span>
+      <div class="result-summary result-summary--inconclusive">
+        <span class="badge badge--warning">[Inconclusivo]</span>
         <h3>Adicione mais informação</h3>
         <p>Para uma simulação útil, insira pelo menos 30 caracteres com contexto da notícia.</p>
       </div>
