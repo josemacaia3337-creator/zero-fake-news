@@ -1,402 +1,188 @@
-const analysisForm = document.querySelector("#analysisForm");
-const newsInput = document.querySelector("#newsInput");
-const resultCard = document.querySelector("#resultCard");
-const clearButton = document.querySelector("#clearButton");
+// =================================================================
+// ZERO FAKE NEWS - MOTOR DE ANÁLISE DINÂMICO (MVP INSTITUCIONAL)
+// =================================================================
 
-const sensationalTerms = [
-  "urgente",
-  "partilhe",
-  "choque",
-  "bomba",
-  "escândalo",
-  "não querem que saibas",
-  "última hora",
-  "viral",
-  "cura milagrosa",
-  "segredo"
-];
+document.addEventListener('DOMContentLoaded', () => {
+    const analysisForm = document.querySelector('#analysisForm') || document.querySelector('form');
+    const newsInput = document.querySelector('#newsInput') || document.querySelector('textarea');
+    const resultCard = document.querySelector('#resultCard') || document.querySelector('.result-section');
+    const loadingSpinner = document.querySelector('#loadingSpinner') || document.querySelector('.loading');
 
-const knownAngolaRumors = [
-  {
-    title: "Falso Bónus de Kwanzas do Governo",
-    text: "Bónus de Kwanzas do Governo",
-    explanation: "Circula como uma promessa de pagamento imediato atribuída ao Governo, normalmente acompanhada de links ou pedidos de dados pessoais. Não partilhe dados bancários, número do BI ou contactos em formulários recebidos por correntes; confirme sempre nos canais oficiais antes de agir."
-  },
-  {
-    title: "Sorteio de motorizadas da marca X",
-    text: "Sorteio de motorizadas da marca X",
-    explanation: "Este tipo de mensagem usa a promessa de prémios caros para incentivar partilhas em massa, cadastros rápidos e cliques em páginas não verificadas. Promoções legítimas devem indicar regulamento, entidade promotora, datas e canais oficiais de contacto."
-  },
-  {
-    title: "Subsídio de isolamento social",
-    text: "Subsídio de isolamento social",
-    explanation: "A mensagem simula um apoio social urgente para recolher dados ou encaminhar pessoas para links suspeitos. Benefícios públicos devem ser validados diretamente em comunicados oficiais e nunca por formulários anónimos enviados em grupos."
-  }
-];
+    // Base de dados simulada de boatos conhecidos em Angola
+    const localHoaxDatabase = [
+        {
+            keywords: ["bónus", "kwanzas", "governo", "subsídio"],
+            score: 12,
+            level: "Muito Baixa Confiabilidade",
+            color: "#dc3545",
+            explanation: "Este texto corresponde a um golpe cibernético clássico de phishing que circula no WhatsApp, prometendo falsos subsídios estatais para roubar dados dos cidadãos. O Governo de Angola já desmentiu oficialmente esta campanha.",
+            negatives: ["Ausência de fontes oficiais", "Promessas de ganho fácil", "Uso de links não governamentais (.xyz)"],
+            positives: []
+        },
+        {
+            keywords: ["sorteio", "motorizada", "marca", "ganhe"],
+            score: 18,
+            level: "Baixa Confiabilidade",
+            color: "#dc3545",
+            explanation: "Esquema fraudulento de engenharia social focado em disseminar links falsos para capturar informações pessoais em troca de prémios inexistentes.",
+            negatives: ["Linguagem emocional extrema", "Uso de termos de urgência ('Partilhe já')", "Domínio web suspeito"],
+            positives: []
+        },
+        {
+            keywords: ["angop", "comunicado", "oficial", "ministério"],
+            score: 95,
+            level: "Alta Confiabilidade",
+            color: "#28a745",
+            explanation: "A estrutura do texto apresenta consistência com os padrões formais de comunicação institucional e agências oficiais do país.",
+            negatives: [],
+            positives: ["Linguagem estritamente objetiva", "Presença de dados verificáveis", "Referências a fontes identificáveis"]
+        }
+    ];
 
-const knownRumorNote = "Este boato já foi desmentido pelas agências de checagem.";
+    if (analysisForm) {
+        analysisForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!newsInput) return;
+            const text = newsInput.value.trim();
 
-const suspiciousRumorPatterns = [
-  {
-    label: "vagas urgentes sem experiência",
-    pattern: /\bvagas?\s+urgentes?\s+(?:e\s+)?sem\s+experi[êe]ncia\b/,
-    explanation: "ofertas de emprego vagas, urgentes e sem critérios claros são frequentemente usadas para recolher dados ou levar a links falsos."
-  },
-  {
-    label: "ganhe dinheiro fácil",
-    pattern: /\bganh[ae]r?\s+dinheiro\s+f[aá]cil\b|\bdinheiro\s+f[aá]cil\b/,
-    explanation: "promessas de dinheiro fácil costumam esconder esquemas, burlas ou pedidos de pagamento antecipado."
-  },
-  {
-    label: "partilhe com 5 grupos",
-    pattern: /\bpartilh[ae]\s+(?:com|em|para)\s+\d+\s+grupos?\b|\bpartilh[ae]\s+(?:com|em|para)\s+cinco\s+grupos?\b/,
-    explanation: "pedidos para partilhar em vários grupos tentam forçar viralização antes de qualquer verificação."
-  },
-  {
-    label: "bónus do governo",
-    pattern: /\bb[oó]nus\s+d[oe]\s+governo\b|\bsubs[ií]dio\s+do\s+governo\s+dispon[ií]vel\b/,
-    explanation: "mensagens sobre benefícios públicos devem ser confirmadas em canais oficiais, porque boatos imitam programas do Estado."
-  },
-  {
-    label: "link oficial atualizado",
-    pattern: /\blink\s+oficial\s+atualizado\b|\blink\s+actualizado\s+oficial\b|\blink\s+oficial\s+actualizado\b/,
-    explanation: "a expressão tenta passar confiança sem identificar a instituição responsável ou um domínio verificável."
-  },
-  {
-    label: "cadastro imediato por WhatsApp",
-    pattern: /\b(?:cadastro|inscri[cç][aã]o|registo)\s+(?:imediat[oa]|urgente)\b.*\bwhats ?app\b|\bwhats ?app\b.*\b(?:cadastro|inscri[cç][aã]o|registo)\s+(?:imediat[oa]|urgente)\b/,
-    explanation: "cadastros urgentes por WhatsApp podem ser usados para recolher dados pessoais sem garantia de origem."
-  },
-  {
-    label: "promoção termina hoje",
-    pattern: /\b(?:promo[cç][aã]o|oferta|campanha)\s+(?:termina|acaba)\s+hoje\b|\b[uú]ltimas?\s+vagas?\b/,
-    explanation: "pressão de tempo reduz a capacidade de confirmar a informação e é comum em correntes falsas."
-  },
-  {
-    label: "não perca esta oportunidade",
-    pattern: /\bn[aã]o\s+perca\s+(?:esta|essa)\s+oportunidade\b|\boportunidade\s+[uú]nica\b/,
-    explanation: "frases promocionais sem fonte clara são típicas de mensagens de boato e captação de cliques."
-  },
-  {
-    label: "envie os seus dados",
-    pattern: /\benvie\s+(?:os\s+)?(?:seus\s+)?dados\b|\binforme\s+(?:o\s+)?(?:seu\s+)?n[uú]mero\s+do\s+bi\b/,
-    explanation: "pedidos de dados pessoais em mensagens virais podem indicar tentativa de burla ou phishing."
-  }
-];
+            if (!text) {
+                alert("Por favor, insira um texto ou link para verificação.");
+                return;
+            }
 
-const sourceTerms = [
-  "ministério",
-  "governo",
-  "polícia",
-  "jornal",
-  "rádio",
-  "televisão",
-  "universidade",
-  "organização",
-  "relatório",
-  "comunicado",
-  "fonte"
-];
+            // Ativa o estado de carregamento simulando a IA
+            if (resultCard) resultCard.style.display = 'none';
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
 
-const verifiableTerms = [
-  "angola",
-  "luanda",
-  "benguela",
-  "huambo",
-  "cabinda",
-  "namibe",
-  "assembleia",
-  "tribunal",
-  "hospital",
-  "escola",
-  "empresa"
-];
+            setTimeout(() => {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                analyzeText(text);
+            }, 2000); // 2 segundos de varredura técnica
+        });
+    }
 
-function normalizeKnownRumorText(text) {
-  return text.trim().toLowerCase().replace(/\s+/g, " ");
-}
+    function analyzeText(text) {
+        const lowerText = text.toLowerCase();
+        let finalAnalysis = null;
 
-function findKnownAngolaRumor(text) {
-  const normalizedText = normalizeKnownRumorText(text);
-  return knownAngolaRumors.find((rumor) => normalizeKnownRumorText(rumor.text) === normalizedText);
-}
+        // 1. Verificação na Base de Boatos Conhecidos
+        for (const hoax of localHoaxDatabase) {
+            const matches = hoax.keywords.every(keyword => lowerText.includes(keyword));
+            if (matches) {
+                finalAnalysis = hoax;
+                break;
+            }
+        }
 
-function countMatches(text, terms) {
-  return terms.filter((term) => text.includes(term)).length;
-}
+        // 2. Se não bater com nenhum boato, roda o Algoritmo de Métricas Heurísticas
+        if (!finalAnalysis) {
+            let score = 60; // Pontuação base neutra
+            let negatives = [];
+            let positives = [];
 
-function findSuspiciousRumors(text) {
-  return suspiciousRumorPatterns.filter((item) => item.pattern.test(text));
-}
+            // Análise de Sinais de Desinformação
+            if (lowerText.includes("!!!") || lowerText.includes("urgente") || lowerText.includes("atenção")) {
+                score -= 15;
+                negatives.push("Sensacionalismo / Tom alarmista detetado");
+            }
+            if (lowerText.includes("partilhe") || lowerText.includes("repassem") || lowerText.includes("5 grupos")) {
+                score -= 20;
+                negatives.push("Indução mecânica à viralização (Corrente)");
+            }
+            if (lowerText.includes(".xyz") || lowerText.includes(".site") || lowerText.includes(".click")) {
+                score -= 25;
+                negatives.push("Estrutura de Link Maliciosa para Roubo de Dados");
+            }
 
-function buildSuspiciousExplanation(matches) {
-  const terms = matches.map((item) => `“${item.label}”`).join(", ");
-  return `Encontrámos padrões de boato muito usados em correntes digitais em Angola: ${terms}. Estes sinais não provam tudo sozinhos, mas indicam alto risco porque exploram urgência, promessas fáceis, pedidos de partilha ou links sem fonte verificável.`;
-}
+            // Identificação de Sinais Positivos
+            if (lowerText.includes("segundo") || lowerText.includes("fonte") || lowerText.includes("de acordo com")) {
+                score += 15;
+                positives.push("Tentativa de atribuição ou citação de fontes");
+            }
+            if (lowerText.includes("dados") || lowerText.includes("relatório") || lowerText.includes("%")) {
+                score += 15;
+                positives.push("Presença de dados quantitativos ou estatísticos");
+            }
 
-function clampScore(score) {
-  return Math.max(0, Math.min(100, score));
-}
+            // Limitar os extremos do Score
+            score = Math.max(0, Math.min(100, score));
 
-function buildCriterion(label, status, detail) {
-  const symbol = status === "positive" ? "✅" : status === "negative" ? "⚠️" : "ℹ️";
-  return `<li><strong>${symbol} ${label}:</strong> ${detail}</li>`;
-}
+            // Classificação por Níveis Oficiais
+            let level = "Moderada Confiabilidade";
+            let color = "#ffc107";
 
-function classifyScore(score, suspiciousMatches = []) {
-  if (suspiciousMatches.length > 0 || score <= 30) {
-    return {
-      badgeClass: "badge--rumor",
-      toneClass: "result-summary--very-low",
-      label: "Muito Baixa Confiabilidade",
-      range: "0–30 pontos",
-      message: suspiciousMatches.length > 0
-        ? buildSuspiciousExplanation(suspiciousMatches)
-        : "O conteúdo tem poucos elementos verificáveis ou usa linguagem suspeita. Evite partilhar sem confirmação.",
-      isSuspiciousRumor: suspiciousMatches.length > 0
-    };
-  }
+            if (score >= 85) {
+                level = "Alta Confiabilidade";
+                color = "#28a745";
+            } else if (score >= 65) {
+                level = "Boa Confiabilidade";
+                color = "#2b8a3e";
+            } else if (score >= 40) {
+                level = "Moderada Confiabilidade";
+                color = "#ffc107";
+            } else if (score >= 20) {
+                level = "Baixa Confiabilidade";
+                color = "#fd7e14";
+            } else {
+                level = "Muito Baixa Confiabilidade";
+                color = "#dc3545";
+            }
 
-  if (score <= 60) {
-    return {
-      badgeClass: "badge--low",
-      toneClass: "result-summary--low",
-      label: "Baixa Confiabilidade",
-      range: "31–60 pontos",
-      message: "Há lacunas relevantes. Confirme origem, data, contexto e entidades citadas antes de partilhar."
-    };
-  }
+            finalAnalysis = {
+                score: score,
+                level: level,
+                color: color,
+                explanation: `A análise heurística atribuiu a nota ${score}/100 baseada na estrutura formal do texto introduzido.`,
+                negatives: negatives,
+                positives: positives
+            };
+        }
 
-  if (score <= 80) {
-    return {
-      badgeClass: "badge--medium",
-      toneClass: "result-summary--medium",
-      label: "Média Confiabilidade",
-      range: "61–80 pontos",
-      message: "O texto apresenta sinais úteis, mas ainda deve ser confirmado em fontes independentes."
-    };
-  }
+        // Renderização Dinâmica dos Resultados no Ecrã
+        renderResults(finalAnalysis);
+    }
 
-  return {
-    badgeClass: "badge--success",
-    toneClass: "result-summary--high",
-    label: "Alta Confiabilidade",
-    range: "81–100 pontos",
-    message: "O texto apresenta vários sinais verificáveis, com fontes, contexto e linguagem mais neutra."
-  };
-}
+    function renderResults(analysis) {
+        const scoreValue = document.querySelector('#scoreValue');
+        const progressBar = document.querySelector('#progressBar');
+        const levelBadge = document.querySelector('#levelBadge');
+        const explanationText = document.querySelector('#explanationText');
+        const negativeList = document.querySelector('#negativeList');
+        const positiveList = document.querySelector('#positiveList');
 
-function analyzeNews(rawText) {
-  const knownRumor = findKnownAngolaRumor(rawText);
+        if (scoreValue) scoreValue.textContent = `${analysis.score}/100`;
+        if (progressBar) {
+            progressBar.style.width = `${analysis.score}%`;
+            progressBar.style.backgroundColor = analysis.color;
+        }
+        if (levelBadge) {
+            levelBadge.textContent = analysis.level;
+            levelBadge.style.backgroundColor = analysis.color;
+        }
+        if (explanationText) explanationText.textContent = analysis.explanation;
 
-  if (knownRumor) {
-    return {
-      score: 0,
-      criteria: [
-        buildCriterion(
-          "Boato conhecido em Angola",
-          "negative",
-          `${knownRumor.title}. ${knownRumor.explanation} ${knownRumorNote}`
-        )
-      ],
-      classification: {
-        badgeClass: "badge--rumor",
-        toneClass: "result-summary--very-low",
-        label: "Muito Baixa Confiabilidade",
-        range: "0–30 pontos",
-        message: `${knownRumorNote} ${knownRumor.explanation}`,
-        isKnownRumor: true,
-        knownRumorTitle: knownRumor.title
-      },
-      suspiciousMatches: []
-    };
-  }
+        if (negativeList) {
+            negativeList.innerHTML = '';
+            if (analysis.negatives.length === 0) {
+                negativeList.innerHTML = '<li>Nenhum sinal crítico detetado.</li>';
+            } else {
+                analysis.negatives.forEach(item => {
+                    negativeList.innerHTML += `<li style="color: #dc3545; list-style: none; margin: 5px 0;">⚠️ ${item}</li>`;
+                });
+            }
+        }
 
-  const text = rawText.trim().toLowerCase();
-  const suspiciousMatches = findSuspiciousRumors(text);
-  let score = 38;
-  const criteria = [];
+        if (positiveList) {
+            positiveList.innerHTML = '';
+            if (analysis.positives.length === 0) {
+                positiveList.innerHTML = '<li>Nenhum indicador de validação formal encontrado.</li>';
+            } else {
+                analysis.positives.forEach(item => {
+                    positiveList.innerHTML += `<li style="color: #28a745; list-style: none; margin: 5px 0;">✅ ${item}</li>`;
+                });
+            }
+        }
 
-  if (suspiciousMatches.length > 0) {
-    score = 12;
-    criteria.push(
-      buildCriterion(
-        "Alerta de rumor",
-        "negative",
-        suspiciousMatches.map((item) => item.explanation).join(" ")
-      )
-    );
-  }
-
-  if (text.length >= 280) {
-    score += 16;
-    criteria.push(buildCriterion("Contexto", "positive", "o texto contém detalhes suficientes para uma primeira leitura."));
-  } else if (text.length >= 120) {
-    score += 8;
-    criteria.push(buildCriterion("Contexto", "neutral", "há algum contexto, mas detalhes adicionais ajudariam a validação."));
-  } else {
-    score -= 12;
-    criteria.push(buildCriterion("Contexto", "negative", "o texto é curto e pode omitir informações importantes."));
-  }
-
-  const sourceMatches = countMatches(text, sourceTerms);
-  if (sourceMatches >= 2 || text.includes("http://") || text.includes("https://")) {
-    score += 18;
-    criteria.push(buildCriterion("Fontes", "positive", "foram encontrados indícios de fontes, instituições ou links."));
-  } else if (sourceMatches === 1) {
-    score += 8;
-    criteria.push(buildCriterion("Fontes", "neutral", "existe uma possível referência, mas a origem precisa de confirmação."));
-  } else {
-    score -= 14;
-    criteria.push(buildCriterion("Fontes", "negative", "não foram identificadas fontes claras ou referências verificáveis."));
-  }
-
-  const sensationalMatches = countMatches(text, sensationalTerms);
-  if (sensationalMatches >= 2) {
-    score -= 24;
-    criteria.push(buildCriterion("Linguagem", "negative", "há vários termos associados a alarmismo ou apelos virais."));
-  } else if (sensationalMatches === 1) {
-    score -= 10;
-    criteria.push(buildCriterion("Linguagem", "neutral", "foi encontrado um termo que pode indicar sensacionalismo."));
-  } else {
-    score += 10;
-    criteria.push(buildCriterion("Linguagem", "positive", "não foram encontrados sinais fortes de alarmismo."));
-  }
-
-  const hasDate = /\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|20\d{2}|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b/.test(text);
-  if (hasDate) {
-    score += 10;
-    criteria.push(buildCriterion("Data", "positive", "o texto inclui uma referência temporal que pode ser verificada."));
-  } else {
-    score -= 6;
-    criteria.push(buildCriterion("Data", "neutral", "não há data evidente; verifique quando o facto teria acontecido."));
-  }
-
-  const verifiableMatches = countMatches(text, verifiableTerms);
-  if (verifiableMatches >= 2) {
-    score += 12;
-    criteria.push(buildCriterion("Termos verificáveis", "positive", "foram encontrados locais ou entidades que podem apoiar a verificação."));
-  } else if (verifiableMatches === 1) {
-    score += 4;
-    criteria.push(buildCriterion("Termos verificáveis", "neutral", "há pelo menos uma pista concreta para investigação."));
-  } else {
-    score -= 8;
-    criteria.push(buildCriterion("Termos verificáveis", "negative", "faltam locais, instituições ou entidades concretas."));
-  }
-
-  const finalScore = suspiciousMatches.length > 0 ? clampScore(Math.min(score, 24)) : clampScore(score);
-  return {
-    score: finalScore,
-    criteria,
-    classification: classifyScore(finalScore, suspiciousMatches),
-    suspiciousMatches
-  };
-}
-
-function buildDynamicDiagnostics(analysis) {
-  const riskItems = [];
-  const positiveItems = [];
-
-  if (analysis.suspiciousMatches.length > 0) {
-    riskItems.push(`Sensacionalismo ou padrões virais: ${analysis.suspiciousMatches.map((item) => item.label).join(", ")}.`);
-  }
-
-  if (analysis.score <= 60) {
-    riskItems.push("Falta de fontes, contexto ou termos verificáveis pode reduzir a confiança da análise.");
-  }
-
-  if (analysis.score > 60) {
-    positiveItems.push("O conteúdo contém sinais verificáveis suficientes para uma leitura preliminar mais segura.");
-  }
-
-  positiveItems.push("Use a pontuação como triagem e confirme em canais oficiais antes de partilhar.");
-
-  return {
-    risks: riskItems.length > 0 ? riskItems : ["Nenhum padrão crítico de desinformação foi destacado pela simulação."],
-    positives: positiveItems
-  };
-}
-
-function renderResult(analysis) {
-  const suspiciousList = analysis.suspiciousMatches.length > 0
-    ? `<div class="rumor-alert" role="alert" aria-live="polite">
-        <strong>🚨 Alerta visual: provável mensagem falsa ou rumor</strong>
-        <span>Expressões detetadas: ${analysis.suspiciousMatches.map((item) => item.label).join(", ")}</span>
-      </div>`
-    : "";
-
-  const diagnostics = buildDynamicDiagnostics(analysis);
-
-  resultCard.innerHTML = `
-    <div class="result-summary ${analysis.classification.toneClass || ""}">
-      <div class="result-header">
-        <span class="badge ${analysis.classification.badgeClass}">${analysis.classification.label}</span>
-        <span class="score__label">Score 0–100</span>
-      </div>
-      ${suspiciousList}
-      <div class="score" aria-label="Pontuação de credibilidade ${analysis.score} de 100">
-        <span class="score__value">${analysis.score}</span>
-        <span>/100</span>
-      </div>
-      <div class="progress-track" aria-hidden="true">
-        <span class="progress-fill" style="--score-width: ${analysis.score}%;"></span>
-      </div>
-      <div class="classification-label">
-        <strong>${analysis.classification.label}</strong>
-        <span>${analysis.classification.range}</span>
-      </div>
-      <p>${analysis.classification.message}</p>
-      <div class="result-diagnostics" aria-label="Diagnóstico resumido da análise">
-        <h4>Sinais de Desinformação Detetados</h4>
-        <ul class="check-list">
-          ${diagnostics.risks.map((item) => `<li><strong>⚠️ Risco:</strong> ${item}</li>`).join("")}
-        </ul>
-        <h4>Sinais Positivos Encontrados</h4>
-        <ul class="check-list">
-          ${diagnostics.positives.map((item) => `<li><strong>✅ Positivo:</strong> ${item}</li>`).join("")}
-        </ul>
-        <h4>Critérios avaliados</h4>
-        <ul class="check-list">
-          ${analysis.criteria.join("")}
-        </ul>
-      </div>
-    </div>
-  `;
-}
-
-function renderEmptyResult() {
-  resultCard.innerHTML = `
-    <div class="result-card__empty">
-      <span class="result-card__icon" aria-hidden="true">🛡️</span>
-      <h3>Resultado aparecerá aqui</h3>
-      <p>Ao clicar em verificar, verá o score de 0 a 100, a barra de progresso e a classificação de confiabilidade correspondente.</p>
-    </div>
-  `;
-}
-
-analysisForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  const text = newsInput.value.trim();
-  const knownRumor = findKnownAngolaRumor(text);
-
-  if (!knownRumor && text.length < 30) {
-    resultCard.innerHTML = `
-      <div class="result-summary result-summary--low">
-        <span class="badge badge--low">Baixa Confiabilidade</span>
-        <h3>Adicione mais informação</h3>
-        <p>Para uma simulação útil, insira pelo menos 30 caracteres com contexto da notícia.</p>
-      </div>
-    `;
-    newsInput.focus();
-    return;
-  }
-
-  renderResult(analyzeNews(text));
-});
-
-clearButton.addEventListener("click", () => {
-  newsInput.value = "";
-  renderEmptyResult();
-  newsInput.focus();
+        if (resultCard) resultCard.style.display = 'block';
+    }
 });
