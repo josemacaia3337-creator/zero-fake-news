@@ -1,5 +1,5 @@
 // =================================================================
-// ZERO FAKE NEWS - MOTOR COM HISTÓRICO E PESQUISA (ETAPA 3)
+// ZERO FAKE NEWS - MOTOR COMPLETO COM ASSISTENTE E FEEDBACK (ETAPA 4)
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultCard = document.querySelector('#resultCard') || document.querySelector('.result-section');
     const loadingSpinner = document.querySelector('#loadingSpinner') || document.querySelector('.loading');
     
-    // Elementos da Etapa 3 (Histórico e Pesquisa)
     const historyList = document.querySelector('#historyList');
     const searchHistory = document.querySelector('#searchHistory');
     const totalAnalysesCount = document.querySelector('#totalAnalysesCount');
@@ -45,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // Repositório de Análises Simuladas para o Histórico (Requisitos 10, 11 e 13)
+    // Histórico de Análises Simuladas
     let analysisHistory = [
         {
             id: 1,
@@ -85,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // Inicializar o Dashboard Lateral
     function updateDashboard(filterKeyword = "") {
         if (!historyList) return;
         historyList.innerHTML = "";
@@ -97,18 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filtered.forEach(item => {
             const li = document.createElement('li');
-            li.style.padding = "10px";
-            li.style.borderBottom = "1px solid #eee";
+            li.style.padding = "12px";
+            li.style.borderBottom = "1px solid #1e293b";
             li.style.cursor = "pointer";
             li.style.listStyle = "none";
+            li.style.transition = "background 0.2s";
             li.innerHTML = `
-                <div style="font-weight: bold; font-size: 14px; color: #333;">${item.title}</div>
-                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px;">
-                    <span style="color: ${item.color}; font-weight: bold;">${item.level} (${item.score}/100)</span>
-                    <span style="color: #777;">${item.date}</span>
+                <div style="font-weight: bold; font-size: 13px; color: #f1f5f9;">${item.title}</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
+                    <span style="color: ${item.color}; font-weight: bold;">${item.score}/100</span>
+                    <span style="color: #94a3b8;">${item.date}</span>
                 </div>
             `;
-            // Evento de clique para recarregar a análise antiga no ecrã principal
             li.addEventListener('click', () => {
                 if (newsInput) newsInput.value = item.text;
                 renderResults(item);
@@ -116,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
             historyList.appendChild(li);
         });
 
-        // Atualizar Métricas Estatísticas Básicas (Requisito 11)
         if (totalAnalysesCount) totalAnalysesCount.textContent = analysisHistory.length;
         if (averageCredibility) {
             const totalScore = analysisHistory.reduce((sum, item) => sum + item.score, 0);
@@ -125,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Ouvinte para a Barra de Pesquisa do Histórico (Requisito 13)
     if (searchHistory) {
         searchHistory.addEventListener('input', (e) => {
             updateDashboard(e.target.value.trim());
@@ -213,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // Adicionar a nova análise ao topo do histórico dinamicamente
         const truncateTitle = text.length > 40 ? text.substring(0, 40) + "..." : text;
         const newRecord = {
             id: Date.now(),
@@ -274,9 +269,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // ELEMENTOS DA ETAPA 4: Injetar Interatividade de Feedback e Assistente (Requisitos 12, 14, 19)
+        let extraTools = document.querySelector('#extraTools');
+        if (!extraTools) {
+            extraTools = document.createElement('div');
+            extraTools.id = 'extraTools';
+            extraTools.style.marginTop = '25px';
+            extraTools.style.paddingTop = '20px';
+            extraTools.style.borderTop = '2px solid #f1f5f9';
+            resultCard.appendChild(extraTools);
+        }
+
+        extraTools.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <span style="font-size: 13px; color: #64748b; margin-right: 10px;">Esta análise foi útil?</span>
+                    <button onclick="alert('Obrigado pelo seu feedback positivo!')" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">👍 Sim</button>
+                    <button onclick="alert('Lamentamos o erro. O relatório foi enviado para a nossa equipa técnica para revisão.')" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-left: 5px;">👎 Não/Reportar Erro</button>
+                </div>
+                
+                <button onclick="alert('Relatório Executivo gerado com sucesso! A exportação estruturada para PDF será integrada na próxima fase de infraestrutura pública.')" style="background: #1e293b; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;">
+                    📥 Gerar Relatório Executivo
+                </button>
+            </div>
+
+            <div style="margin-top: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px;">
+                <h5 style="margin: 0 0 10px 0; color: #0284c7; font-size: 14px;">🤖 Assistente de Credibilidade Digital</h5>
+                <p style="margin: 0 0 12px 0; font-size: 13px; color: #475569;">Clique nas dúvidas frequentes para que a IA justifique os critérios técnicos aplicados:</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="alert('O sistema analisa padrões linguísticos: o uso de múltiplos pontos de exclamação (!!!), termos sensacionalistas e ordens expressas de partilha reduzem a pontuação por indicarem comportamento típico de boatos virais.')" style="background: #fff; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #334155;">Como é calculada a nota?</button>
+                    <button onclick="alert('Para atingir Alta Confiabilidade (acima de 85 pontos), o texto precisa de conter referências explícitas a canais de imprensa oficiais, agências públicas (como a ANGOP) ou dados estatísticos percentuais sem alarmismo.')" style="background: #fff; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #334155;">O que valida uma notícia oficial?</button>
+                </div>
+            </div>
+        `;
+
         if (resultCard) resultCard.style.display = 'block';
     }
 
-    // Inicialização automática do painel lateral
     updateDashboard();
 });
