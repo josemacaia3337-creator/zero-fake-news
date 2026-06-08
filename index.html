@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zero Fake News | Análise de Credibilidade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="topbar" aria-label="Navegação principal">
+      <a class="brand" href="#top" aria-label="Página inicial Zero Fake News">
+        <span class="brand__mark">ZFN</span>
+        <span>Zero Fake News</span>
+      </a>
+      <a class="topbar__link" href="#analysis">Analisar notícia</a>
+    </nav>
+
+    <section class="hero__content" id="top">
+      <p class="eyebrow">MVP para Angola</p>
+      <h1>Analise sinais de desinformação antes de partilhar.</h1>
+      <p class="hero__text">
+        Uma interface leve para simular a validação de notícias, mensagens virais
+        e publicações suspeitas com critérios claros e recomendações práticas.
+      </p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="#analysis">Começar análise</a>
+        <a class="button button--ghost" href="#criteria">Ver critérios</a>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="panel analysis" id="analysis" aria-labelledby="analysis-title">
+      <div class="section-heading">
+        <p class="eyebrow">Análise rápida</p>
+        <h2 id="analysis-title">Cole o texto da notícia</h2>
+        <p>
+          O resultado é uma simulação educativa. Confirme sempre com fontes oficiais,
+          órgãos de comunicação credíveis e verificadores independentes.
+        </p>
+      </div>
+
+      <form class="analysis-form" id="analysisForm">
+        <label for="newsInput">Texto para análise</label>
+        <textarea
+          id="newsInput"
+          name="newsInput"
+          rows="10"
+          minlength="30"
+          placeholder="Ex.: O Governo anunciou uma nova medida..."
+          required
+        ></textarea>
+        <div class="form-actions">
+          <button class="button button--primary" type="submit">Analisar credibilidade</button>
+          <button class="button button--secondary" type="button" id="clearButton">Limpar</button>
+        </div>
+      </form>
+
+      <aside class="result-card" id="resultCard" aria-live="polite">
+        <div class="result-card__empty">
+          <span class="result-card__icon" aria-hidden="true">🛡️</span>
+          <h3>Resultado aparecerá aqui</h3>
+          <p>Insira uma notícia para receber uma pontuação e recomendações de validação.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="criteria" id="criteria" aria-labelledby="criteria-title">
+      <div class="section-heading section-heading--center">
+        <p class="eyebrow">Critérios simulados</p>
+        <h2 id="criteria-title">Como a primeira avaliação funciona</h2>
+      </div>
+
+      <div class="criteria-grid">
+        <article class="criterion">
+          <span aria-hidden="true">🧾</span>
+          <h3>Contexto suficiente</h3>
+          <p>Textos com detalhes, datas e explicações tendem a ser mais verificáveis.</p>
+        </article>
+        <article class="criterion">
+          <span aria-hidden="true">🔗</span>
+          <h3>Fontes e referências</h3>
+          <p>Menções a instituições, ligações ou documentos ajudam a confirmar a origem.</p>
+        </article>
+        <article class="criterion">
+          <span aria-hidden="true">⚠️</span>
+          <h3>Linguagem sensacionalista</h3>
+          <p>Urgência extrema, alarmismo e apelos para partilhar reduzem a confiança.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Zero Fake News — protótipo inicial para literacia mediática e verificação de informação.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
