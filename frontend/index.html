@@ -32,7 +32,7 @@
           <p class="eyebrow">Histórico</p>
           <h2 id="history-title">Análises recentes</h2>
         </div>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre subsídio viral">
+        <a class="history-item history-item--active" href="#analysis" aria-current="true" aria-label="Abrir análise sobre subsídio viral">
           <span class="history-item__status history-item__status--danger"></span>
           <span>
             Subsídio viral no WhatsApp
@@ -114,7 +114,17 @@
 
           <aside class="result-card" id="resultCard" aria-live="polite" aria-label="Área de resultados da verificação">
             <div class="result-card__empty">
-              <span class="result-card__icon" aria-hidden="true">🛡️</span>
+              <div class="score-preview" aria-label="Pré-visualização do score de credibilidade">
+                <span class="result-card__icon" aria-hidden="true">🛡️</span>
+                <div class="score-preview__number">
+                  <span>72</span>
+                  <small>/100</small>
+                </div>
+                <div class="progress-track" aria-hidden="true">
+                  <span class="progress-fill" style="--score-width: 72%;"></span>
+                </div>
+                <strong>Score de Credibilidade</strong>
+              </div>
               <h3>Resultado aparecerá aqui</h3>
               <p>Ao clicar em verificar, verá o score de 0 a 100, a barra de progresso e a classificação de confiabilidade correspondente.</p>
             </div>
@@ -128,24 +138,40 @@
             <p>O score é apresentado numa escala de 0 a 100 para apoiar decisões rápidas antes da partilha.</p>
           </div>
 
-          <div class="scale-grid" aria-label="Classificações oficiais de confiabilidade">
+          <div class="score-scale-overview" aria-label="Resumo visual do score de credibilidade">
+            <div>
+              <span class="score-scale-overview__label">Score de Credibilidade</span>
+              <strong>0–100</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span class="progress-fill" style="--score-width: 100%;"></span>
+            </div>
+            <p>Quanto maior o score, maior a presença de fontes, contexto, linguagem neutra e elementos verificáveis.</p>
+          </div>
+
+          <div class="scale-grid" aria-label="Cinco classificações oficiais de confiabilidade">
             <article class="scale-card scale-card--high">
               <span>81–100</span>
               <h3>Alta Confiabilidade</h3>
               <p>Conteúdo com fontes, contexto, datas e baixo risco de manipulação.</p>
             </article>
-            <article class="scale-card scale-card--medium">
+            <article class="scale-card scale-card--good">
               <span>61–80</span>
+              <h3>Boa Confiabilidade</h3>
+              <p>Predominam sinais positivos, mas recomenda-se uma confirmação complementar.</p>
+            </article>
+            <article class="scale-card scale-card--medium">
+              <span>41–60</span>
               <h3>Média Confiabilidade</h3>
-              <p>Há bons sinais, mas ainda existem pontos que exigem confirmação independente.</p>
+              <p>Há elementos úteis misturados com lacunas que exigem verificação independente.</p>
             </article>
             <article class="scale-card scale-card--low">
-              <span>31–60</span>
+              <span>21–40</span>
               <h3>Baixa Confiabilidade</h3>
               <p>O texto apresenta lacunas relevantes ou linguagem que reduz a confiança.</p>
             </article>
             <article class="scale-card scale-card--critical">
-              <span>0–30</span>
+              <span>0–20</span>
               <h3>Muito Baixa Confiabilidade</h3>
               <p>Alta probabilidade de rumor, falta de fontes ou apelos virais suspeitos.</p>
             </article>
