@@ -16,6 +16,26 @@ const sensationalTerms = [
   "segredo"
 ];
 
+const knownAngolaRumors = [
+  {
+    title: "Falso Bónus de Kwanzas do Governo",
+    text: "Bónus de Kwanzas do Governo",
+    explanation: "Circula como uma promessa de pagamento imediato atribuída ao Governo, normalmente acompanhada de links ou pedidos de dados pessoais. Não partilhe dados bancários, número do BI ou contactos em formulários recebidos por correntes; confirme sempre nos canais oficiais antes de agir."
+  },
+  {
+    title: "Sorteio de motorizadas da marca X",
+    text: "Sorteio de motorizadas da marca X",
+    explanation: "Este tipo de mensagem usa a promessa de prémios caros para incentivar partilhas em massa, cadastros rápidos e cliques em páginas não verificadas. Promoções legítimas devem indicar regulamento, entidade promotora, datas e canais oficiais de contacto."
+  },
+  {
+    title: "Subsídio de isolamento social",
+    text: "Subsídio de isolamento social",
+    explanation: "A mensagem simula um apoio social urgente para recolher dados ou encaminhar pessoas para links suspeitos. Benefícios públicos devem ser validados diretamente em comunicados oficiais e nunca por formulários anónimos enviados em grupos."
+  }
+];
+
+const knownRumorNote = "Este boato já foi desmentido pelas agências de checagem.";
+
 const suspiciousRumorPatterns = [
   {
     label: "vagas urgentes sem experiência",
@@ -92,6 +112,15 @@ const verifiableTerms = [
   "empresa"
 ];
 
+function normalizeKnownRumorText(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function findKnownAngolaRumor(text) {
+  const normalizedText = normalizeKnownRumorText(text);
+  return knownAngolaRumors.find((rumor) => normalizeKnownRumorText(rumor.text) === normalizedText);
+}
+
 function countMatches(text, terms) {
   return terms.filter((term) => text.includes(term)).length;
 }
@@ -152,6 +181,30 @@ function classifyScore(score, suspiciousMatches = []) {
 }
 
 function analyzeNews(rawText) {
+  const knownRumor = findKnownAngolaRumor(rawText);
+
+  if (knownRumor) {
+    return {
+      score: 0,
+      criteria: [
+        buildCriterion(
+          "Boato conhecido em Angola",
+          "negative",
+          `${knownRumor.title}. ${knownRumor.explanation} ${knownRumorNote}`
+        )
+      ],
+      classification: {
+        badgeClass: "badge--rumor",
+        toneClass: "result-summary--rumor",
+        label: "[Falso / Rumor]",
+        message: `${knownRumorNote} ${knownRumor.explanation}`,
+        isKnownRumor: true,
+        knownRumorTitle: knownRumor.title
+      },
+      suspiciousMatches: []
+    };
+  }
+
   const text = rawText.trim().toLowerCase();
   const suspiciousMatches = findSuspiciousRumors(text);
   let score = 38;
@@ -271,7 +324,9 @@ analysisForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const text = newsInput.value.trim();
-  if (text.length < 30) {
+  const knownRumor = findKnownAngolaRumor(text);
+
+  if (!knownRumor && text.length < 30) {
     resultCard.innerHTML = `
       <div class="result-summary result-summary--inconclusive">
         <span class="badge badge--warning">[Inconclusivo]</span>
