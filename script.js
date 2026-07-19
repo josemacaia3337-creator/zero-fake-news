@@ -1,310 +1,195 @@
-// =================================================================
-// ZERO FAKE NEWS - MOTOR COMPLETO COM ASSISTENTE E FEEDBACK (ETAPA 4)
-// =================================================================
+const companies = [
+  { id: 1, name: 'Mercado Kilamba' },
+  { id: 2, name: 'Farmácia Atlântico' },
+];
 
-document.addEventListener('DOMContentLoaded', () => {
-    const analysisForm = document.querySelector('#analysisForm') || document.querySelector('form');
-    const newsInput = document.querySelector('#newsInput') || document.querySelector('textarea');
-    const resultCard = document.querySelector('#resultCard') || document.querySelector('.result-section');
-    const loadingSpinner = document.querySelector('#loadingSpinner') || document.querySelector('.loading');
-    
-    const historyList = document.querySelector('#historyList');
-    const searchHistory = document.querySelector('#searchHistory');
-    const totalAnalysesCount = document.querySelector('#totalAnalysesCount');
-    const averageCredibility = document.querySelector('#averageCredibility');
+let activeCompanyId = 1;
+let deleteTargetId = null;
 
-    // Base de dados de boatos conhecidos em Angola
-    const localHoaxDatabase = [
-        {
-            keywords: ["bónus", "kwanzas", "governo", "subsídio"],
-            score: 12,
-            level: "Muito Baixa Confiabilidade",
-            color: "#dc3545",
-            explanation: "Este conteúdo corresponde a um golpe cibernético clássico de phishing que circula no WhatsApp, prometendo falsos subsídios estatais para roubar dados dos cidadãos. O Governo de Angola já desmentiu oficialmente esta campanha.",
-            negatives: ["Ausência de fontes oficiais", "Promessas de ganho fácil", "Uso de links não governamentais (.xyz)"],
-            positives: []
-        },
-        {
-            keywords: ["sorteio", "motorizada", "marca", "ganhe"],
-            score: 18,
-            level: "Baixa Confiabilidade",
-            color: "#dc3545",
-            explanation: "Esquema fraudulento de engenharia social focado em disseminar links falsos para capturar informações pessoais em troca de prémios inexistentes.",
-            negatives: ["Linguagem emocional extrema", "Uso de termos de urgência ('Partilhe já')", "Domínio web suspeito"],
-            positives: []
-        },
-        {
-            keywords: ["angop", "comunicado", "oficial", "ministério"],
-            score: 95,
-            level: "Alta Confiabilidade",
-            color: "#28a745",
-            explanation: "A estrutura do texto apresenta consistência com os padrões formais de comunicação institucional e agências oficiais do país.",
-            negatives: [],
-            positives: ["Linguagem estritamente objetiva", "Presença de dados verificáveis", "Referências a fontes identificáveis"]
-        }
-    ];
+const state = {
+  categories: [
+    { id: 1, empresa_id: 1, nome: 'Bebidas', descricao: 'Águas, sumos e refrigerantes', data_criacao: '2026-07-01' },
+    { id: 2, empresa_id: 1, nome: 'Alimentação', descricao: 'Produtos alimentares em geral', data_criacao: '2026-07-01' },
+    { id: 3, empresa_id: 1, nome: 'Higiene', descricao: 'Higiene pessoal e limpeza', data_criacao: '2026-07-02' },
+    { id: 4, empresa_id: 2, nome: 'Medicamentos', descricao: 'Produtos farmacêuticos', data_criacao: '2026-07-03' },
+  ],
+  products: [
+    { id: 1, empresa_id: 1, categoria_id: 2, fornecedor_id: null, fornecedor_nome: 'AgroDistribuição Lda', nome: 'Arroz agulha 5kg', codigo_produto: 'ALI-001', codigo_barras: '5601000000012', descricao: 'Saco de arroz branco tipo agulha.', unidade_medida: 'pct', preco_compra: 3500, preco_venda: 4550, quantidade_estoque: 42, estoque_minimo: 12, data_criacao: '2026-07-10', data_atualizacao: '2026-07-10' },
+    { id: 2, empresa_id: 1, categoria_id: 1, fornecedor_id: null, fornecedor_nome: 'Bebidas Sul', nome: 'Água mineral 1.5L', codigo_produto: 'BEB-014', codigo_barras: '5601000000142', descricao: 'Garrafa de água mineral sem gás.', unidade_medida: 'un', preco_compra: 180, preco_venda: 260, quantidade_estoque: 8, estoque_minimo: 20, data_criacao: '2026-07-11', data_atualizacao: '2026-07-12' },
+    { id: 3, empresa_id: 2, categoria_id: 4, fornecedor_id: null, fornecedor_nome: 'Saúde Global', nome: 'Paracetamol 500mg', codigo_produto: 'MED-001', codigo_barras: '7890000001110', descricao: 'Caixa com comprimidos.', unidade_medida: 'cx', preco_compra: 900, preco_venda: 1250, quantidade_estoque: 120, estoque_minimo: 25, data_criacao: '2026-07-12', data_atualizacao: '2026-07-12' },
+  ],
+  changeLog: [],
+};
 
-    // Histórico de Análises Simuladas
-    let analysisHistory = [
-        {
-            id: 1,
-            title: "Falso bónus de 50.000 Kz atribuído ao Governo",
-            text: "O governo está a dar um bónus de 50000 kwanzas para todos os cidadãos. Insira os seus dados no link urgente!!!",
-            score: 12,
-            level: "Muito Baixa Confiabilidade",
-            color: "#dc3545",
-            date: "08/06/2026",
-            explanation: "Este conteúdo corresponde a um golpe cibernético clássico de phishing que circula no WhatsApp, prometendo falsos subsídios estatais. O Governo de Angola já desmentiu oficialmente esta campanha.",
-            negatives: ["Ausência de fontes oficiais", "Promessas de ganho fácil", "Uso de links não governamentais (.xyz)"],
-            positives: []
-        },
-        {
-            id: 2,
-            title: "Comunicado Oficial da Agência ANGOP sobre Economia",
-            text: "Segundo o relatório oficial emitido pela ANGOP, a taxa de inflação registou uma quebra de 2% no último trimestre de acordo com dados do BNA.",
-            score: 95,
-            level: "Alta Confiabilidade",
-            color: "#28a745",
-            date: "07/06/2026",
-            explanation: "A estrutura do texto apresenta consistência com os padrões formais de comunicação institucional e agências oficiais do país.",
-            negatives: [],
-            positives: ["Linguagem estritamente objetiva", "Presença de dados verificáveis", "Referências a fontes identificáveis"]
-        },
-        {
-            id: 3,
-            title: "Vagas urgentes na Sonangol sem experiência",
-            text: "Grande recrutamento urgente na Sonangol!!! Mais de 500 vagas para entrada imediata sem experiência necessária. Partilhe com 5 grupos para validar a sua inscrição.",
-            score: 25,
-            level: "Baixa Confiabilidade",
-            color: "#fd7e14",
-            date: "05/06/2026",
-            explanation: "Uso explícito de táticas de engenharia social (indução mecânica à partilha em massa) e promessas extraordinárias fora dos canais formais da empresa.",
-            negatives: ["Indução mecânica à viralização (Corrente)", "Tom alarmista / Sensacionalismo detetado"],
-            positives: []
-        }
-    ];
+const $ = (selector) => document.querySelector(selector);
+const companyScoped = (items) => items.filter((item) => item.empresa_id === activeCompanyId);
+const today = () => new Date().toISOString().slice(0, 10);
+const money = (value) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA', maximumFractionDigits: 0 }).format(value).replace('AOA', 'Kz');
+const nextId = (items) => Math.max(0, ...items.map((item) => item.id)) + 1;
 
-    function updateDashboard(filterKeyword = "") {
-        if (!historyList) return;
-        historyList.innerHTML = "";
+function init() {
+  $('#companySwitcher').innerHTML = companies.map((company) => `<option value="${company.id}">${company.name}</option>`).join('');
+  $('#companySwitcher').value = String(activeCompanyId);
+  bindEvents();
+  renderAll();
+}
 
-        const filtered = analysisHistory.filter(item => 
-            item.title.toLowerCase().includes(filterKeyword.toLowerCase()) ||
-            item.text.toLowerCase().includes(filterKeyword.toLowerCase())
-        );
+function bindEvents() {
+  $('#companySwitcher').addEventListener('change', (event) => {
+    activeCompanyId = Number(event.target.value);
+    resetProductForm();
+    resetCategoryForm();
+    renderAll();
+  });
+  $('#productForm').addEventListener('submit', saveProduct);
+  $('#cancelEdit').addEventListener('click', resetProductForm);
+  $('#categoryForm').addEventListener('submit', saveCategory);
+  $('#cancelCategoryEdit').addEventListener('click', resetCategoryForm);
+  ['#searchName', '#searchCode', '#categoryFilter', '#sortProducts'].forEach((selector) => $(selector).addEventListener('input', renderProducts));
+  $('#confirmDelete').addEventListener('click', confirmDeleteProduct);
+  $('#cancelDelete').addEventListener('click', closeDeleteModal);
+}
 
-        filtered.forEach(item => {
-            const li = document.createElement('li');
-            li.style.padding = "12px";
-            li.style.borderBottom = "1px solid #1e293b";
-            li.style.cursor = "pointer";
-            li.style.listStyle = "none";
-            li.style.transition = "background 0.2s";
-            li.innerHTML = `
-                <div style="font-weight: bold; font-size: 13px; color: #f1f5f9;">${item.title}</div>
-                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
-                    <span style="color: ${item.color}; font-weight: bold;">${item.score}/100</span>
-                    <span style="color: #94a3b8;">${item.date}</span>
-                </div>
-            `;
-            li.addEventListener('click', () => {
-                if (newsInput) newsInput.value = item.text;
-                renderResults(item);
-            });
-            historyList.appendChild(li);
-        });
+function renderAll() {
+  renderCategoryOptions();
+  renderProducts();
+  renderCategories();
+  renderMetrics();
+  renderChangeLog();
+}
 
-        if (totalAnalysesCount) totalAnalysesCount.textContent = analysisHistory.length;
-        if (averageCredibility) {
-            const totalScore = analysisHistory.reduce((sum, item) => sum + item.score, 0);
-            const avg = analysisHistory.length ? Math.round(totalScore / analysisHistory.length) : 0;
-            averageCredibility.textContent = `${avg}/100`;
-        }
-    }
+function renderCategoryOptions() {
+  const categories = companyScoped(state.categories);
+  const options = categories.map((category) => `<option value="${category.id}">${category.nome}</option>`).join('');
+  $('#categoryId').innerHTML = `<option value="">Selecione</option>${options}`;
+  $('#categoryFilter').innerHTML = `<option value="">Todas as categorias</option>${options}`;
+}
 
-    if (searchHistory) {
-        searchHistory.addEventListener('input', (e) => {
-            updateDashboard(e.target.value.trim());
-        });
-    }
+function getCategoryName(categoryId) {
+  return companyScoped(state.categories).find((category) => category.id === Number(categoryId))?.nome || 'Sem categoria';
+}
 
-    if (analysisForm) {
-        analysisForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (!newsInput) return;
-            const text = newsInput.value.trim();
+function stockStatus(product) {
+  if (product.quantidade_estoque <= 0) return ['Esgotado', 'out'];
+  if (product.quantidade_estoque <= product.estoque_minimo) return ['Baixo estoque', 'low'];
+  return ['Disponível', 'ok'];
+}
 
-            if (!text) {
-                alert("Por favor, insira um texto ou link para verificação.");
-                return;
-            }
+function renderProducts() {
+  const name = $('#searchName').value.trim().toLowerCase();
+  const code = $('#searchCode').value.trim().toLowerCase();
+  const category = Number($('#categoryFilter').value || 0);
+  const sort = $('#sortProducts').value;
+  const products = companyScoped(state.products)
+    .filter((product) => product.nome.toLowerCase().includes(name))
+    .filter((product) => product.codigo_produto.toLowerCase().includes(code) || (product.codigo_barras || '').toLowerCase().includes(code))
+    .filter((product) => !category || product.categoria_id === category)
+    .sort((a, b) => typeof a[sort] === 'number' ? a[sort] - b[sort] : String(a[sort]).localeCompare(String(b[sort]), 'pt'));
 
-            if (resultCard) resultCard.style.display = 'none';
-            if (loadingSpinner) loadingSpinner.style.display = 'block';
+  $('#productsTable').innerHTML = products.map((product) => {
+    const [label, type] = stockStatus(product);
+    return `<tr><td><strong>${product.nome}</strong><br><small>${product.descricao || 'Sem descrição'}</small></td><td>${product.codigo_produto}<br><small>${product.codigo_barras || 'Sem código de barras'}</small></td><td>${getCategoryName(product.categoria_id)}</td><td>${product.quantidade_estoque} ${product.unidade_medida}</td><td>${money(product.preco_venda)}</td><td><span class="status status--${type}">${label}</span></td><td><div class="row-actions"><button class="icon-button" data-edit="${product.id}">Editar</button><button class="icon-button icon-button--danger" data-delete="${product.id}">Excluir</button></div></td></tr>`;
+  }).join('') || '<tr><td colspan="7">Nenhum produto encontrado para esta empresa.</td></tr>';
 
-            setTimeout(() => {
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
-                analyzeText(text);
-            }, 2000);
-        });
-    }
+  document.querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => editProduct(Number(button.dataset.edit))));
+  document.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => openDeleteModal(Number(button.dataset.delete))));
+  renderMetrics();
+}
 
-    function analyzeText(text) {
-        const lowerText = text.toLowerCase();
-        let finalAnalysis = null;
+function collectProductForm() {
+  return {
+    nome: $('#productName').value.trim(), codigo_produto: $('#productCode').value.trim(), codigo_barras: $('#barcode').value.trim(), categoria_id: Number($('#categoryId').value), fornecedor_nome: $('#supplier').value.trim(), descricao: $('#description').value.trim(), unidade_medida: $('#unit').value, preco_compra: Number($('#purchasePrice').value), preco_venda: Number($('#salePrice').value), quantidade_estoque: Number($('#stockQuantity').value), estoque_minimo: Number($('#minimumStock').value),
+  };
+}
 
-        for (const hoax of localHoaxDatabase) {
-            const matches = hoax.keywords.every(keyword => lowerText.includes(keyword));
-            if (matches) {
-                finalAnalysis = JSON.parse(JSON.stringify(hoax));
-                break;
-            }
-        }
+function validateProduct(payload, editingId = null) {
+  if (!payload.nome || !payload.codigo_produto || !payload.categoria_id || !payload.unidade_medida) return 'Preencha nome, código interno, categoria e unidade de medida.';
+  if ([payload.preco_compra, payload.preco_venda, payload.quantidade_estoque, payload.estoque_minimo].some((value) => Number.isNaN(value) || value < 0)) return 'Preços e quantidades não podem ser negativos.';
+  if (!companyScoped(state.categories).some((category) => category.id === payload.categoria_id)) return 'Categoria inválida para a empresa ativa.';
+  const duplicatedCode = companyScoped(state.products).some((product) => product.codigo_produto === payload.codigo_produto && product.id !== editingId);
+  return duplicatedCode ? 'Código interno já utilizado nesta empresa.' : '';
+}
 
-        if (!finalAnalysis) {
-            let score = 60;
-            let negatives = [];
-            let positives = [];
+function saveProduct(event) {
+  event.preventDefault();
+  const editingId = Number($('#productId').value || 0);
+  const payload = collectProductForm();
+  const error = validateProduct(payload, editingId || null);
+  if (error) return showMessage(error, 'error');
 
-            if (lowerText.includes("!!!") || lowerText.includes("urgente") || lowerText.includes("atenção")) {
-                score -= 15;
-                negatives.push("Sensacionalismo / Tom alarmista detetado");
-            }
-            if (lowerText.includes("partilhe") || lowerText.includes("repassem") || lowerText.includes("5 grupos")) {
-                score -= 20;
-                negatives.push("Indução mecânica à viralização (Corrente)");
-            }
-            if (lowerText.includes(".xyz") || lowerText.includes(".site") || lowerText.includes(".click")) {
-                score -= 25;
-                negatives.push("Estrutura de Link Maliciosa para Roubo de Dados");
-            }
+  if (editingId) {
+    const product = state.products.find((item) => item.id === editingId && item.empresa_id === activeCompanyId);
+    if (!product) return showMessage('Produto não encontrado no escopo da empresa.', 'error');
+    registerProductChanges(product, payload);
+    Object.assign(product, payload, { data_atualizacao: today() });
+    showMessage('Produto atualizado com segurança.', 'success');
+  } else {
+    state.products.push({ id: nextId(state.products), empresa_id: activeCompanyId, fornecedor_id: null, ...payload, data_criacao: today(), data_atualizacao: today() });
+    addLog(`Produto "${payload.nome}" cadastrado.`);
+    showMessage('Produto cadastrado com sucesso.', 'success');
+  }
+  resetProductForm(false);
+  renderAll();
+}
 
-            if (lowerText.includes("segundo") || lowerText.includes("fonte") || lowerText.includes("de acordo com")) {
-                score += 15;
-                positives.push("Tentativa de atribuição ou citação de fontes");
-            }
-            if (lowerText.includes("dados") || lowerText.includes("relatório") || lowerText.includes("%")) {
-                score += 15;
-                positives.push("Presença de dados quantitativos ou estatísticos");
-            }
+function registerProductChanges(oldProduct, nextProduct) {
+  [['preco_compra', 'preço de compra'], ['preco_venda', 'preço de venda'], ['categoria_id', 'categoria'], ['estoque_minimo', 'estoque mínimo']].forEach(([field, label]) => {
+    if (oldProduct[field] !== nextProduct[field]) addLog(`Alterado ${label} do produto "${oldProduct.nome}".`);
+  });
+}
 
-            score = Math.max(0, Math.min(100, score));
+function editProduct(id) {
+  const product = state.products.find((item) => item.id === id && item.empresa_id === activeCompanyId);
+  if (!product) return showMessage('Acesso negado: produto pertence a outra empresa.', 'error');
+  $('#productId').value = product.id; $('#productName').value = product.nome; $('#productCode').value = product.codigo_produto; $('#barcode').value = product.codigo_barras || ''; $('#categoryId').value = product.categoria_id; $('#unit').value = product.unidade_medida; $('#supplier').value = product.fornecedor_nome || ''; $('#purchasePrice').value = product.preco_compra; $('#salePrice').value = product.preco_venda; $('#stockQuantity').value = product.quantidade_estoque; $('#minimumStock').value = product.estoque_minimo; $('#description').value = product.descricao || '';
+  $('#submitProduct').textContent = 'Atualizar produto';
+  location.hash = 'product-form-section';
+}
 
-            let level = "Moderada Confiabilidade";
-            let color = "#ffc107";
+function resetProductForm(clearMessage = true) {
+  $('#productForm').reset(); $('#productId').value = ''; $('#submitProduct').textContent = 'Salvar produto';
+  if (clearMessage) $('#formMessage').textContent = '';
+}
 
-            if (score >= 85) { level = "Alta Confiabilidade"; color = "#28a745"; }
-            else if (score >= 65) { level = "Boa Confiabilidade"; color = "#2b8a3e"; }
-            else if (score >= 40) { level = "Moderada Confiabilidade"; color = "#ffc107"; }
-            else if (score >= 20) { level = "Baixa Confiabilidade"; color = "#fd7e14"; }
-            else { level = "Muito Baixa Confiabilidade"; color = "#dc3545"; }
+function openDeleteModal(id) {
+  const product = state.products.find((item) => item.id === id && item.empresa_id === activeCompanyId);
+  if (!product) return showMessage('Acesso negado: produto fora da empresa ativa.', 'error');
+  deleteTargetId = id; $('#confirmText').textContent = `Tem certeza que deseja excluir "${product.nome}"? Esta ação está preparada para futura exclusão lógica.`; $('#confirmModal').hidden = false;
+}
+function closeDeleteModal() { deleteTargetId = null; $('#confirmModal').hidden = true; }
+function confirmDeleteProduct() {
+  const product = state.products.find((item) => item.id === deleteTargetId && item.empresa_id === activeCompanyId);
+  if (product) { state.products = state.products.filter((item) => item.id !== product.id); addLog(`Produto "${product.nome}" excluído com confirmação.`); }
+  closeDeleteModal(); renderAll();
+}
 
-            finalAnalysis = {
-                score: score,
-                level: level,
-                color: color,
-                explanation: `A análise heurística atribuiu a nota ${score}/100 baseada na estrutura formal do texto introduzido.`,
-                negatives: negatives,
-                positives: positives
-            };
-        }
+function saveCategory(event) {
+  event.preventDefault();
+  const id = Number($('#categoryEditId').value || 0); const nome = $('#categoryName').value.trim(); const descricao = $('#categoryDescription').value.trim();
+  if (!nome) return;
+  const duplicate = companyScoped(state.categories).some((category) => category.nome.toLowerCase() === nome.toLowerCase() && category.id !== id);
+  if (duplicate) return alert('Categoria já existe nesta empresa.');
+  if (id) { const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); Object.assign(category, { nome, descricao }); addLog(`Categoria "${nome}" atualizada.`); }
+  else { state.categories.push({ id: nextId(state.categories), empresa_id: activeCompanyId, nome, descricao, data_criacao: today() }); addLog(`Categoria "${nome}" criada.`); }
+  resetCategoryForm(); renderAll();
+}
 
-        const truncateTitle = text.length > 40 ? text.substring(0, 40) + "..." : text;
-        const newRecord = {
-            id: Date.now(),
-            title: truncateTitle,
-            text: text,
-            score: finalAnalysis.score,
-            level: finalAnalysis.level,
-            color: finalAnalysis.color,
-            date: "Hoje",
-            explanation: finalAnalysis.explanation,
-            negatives: finalAnalysis.negatives,
-            positives: finalAnalysis.positives
-        };
-        
-        analysisHistory.unshift(newRecord);
-        updateDashboard();
-        renderResults(finalAnalysis);
-    }
+function renderCategories() {
+  $('#categoriesList').innerHTML = companyScoped(state.categories).map((category) => `<article class="category-card"><h3>${category.nome}</h3><p>${category.descricao || 'Sem descrição'}</p><small>Criada em ${category.data_criacao}</small><div class="row-actions"><button class="icon-button" data-edit-category="${category.id}">Editar</button><button class="icon-button icon-button--danger" data-remove-category="${category.id}">Remover</button></div></article>`).join('');
+  document.querySelectorAll('[data-edit-category]').forEach((button) => button.addEventListener('click', () => editCategory(Number(button.dataset.editCategory))));
+  document.querySelectorAll('[data-remove-category]').forEach((button) => button.addEventListener('click', () => removeCategory(Number(button.dataset.removeCategory))));
+}
+function editCategory(id) { const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); $('#categoryEditId').value = category.id; $('#categoryName').value = category.nome; $('#categoryDescription').value = category.descricao || ''; }
+function removeCategory(id) {
+  if (companyScoped(state.products).some((product) => product.categoria_id === id)) return alert('Categoria possui produtos associados. Altere os produtos antes de remover.');
+  const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); if (!category) return;
+  if (confirm(`Remover a categoria "${category.nome}"?`)) { state.categories = state.categories.filter((item) => item.id !== id); addLog(`Categoria "${category.nome}" removida.`); renderAll(); }
+}
+function resetCategoryForm() { $('#categoryForm').reset(); $('#categoryEditId').value = ''; }
 
-    function renderResults(analysis) {
-        const scoreValue = document.querySelector('#scoreValue');
-        const progressBar = document.querySelector('#progressBar');
-        const levelBadge = document.querySelector('#levelBadge');
-        const explanationText = document.querySelector('#explanationText');
-        const negativeList = document.querySelector('#negativeList');
-        const positiveList = document.querySelector('#positiveList');
+function renderMetrics() { const products = companyScoped(state.products); $('#totalProducts').textContent = products.length; $('#lowStockProducts').textContent = products.filter((product) => product.quantidade_estoque <= product.estoque_minimo).length; $('#totalCategories').textContent = companyScoped(state.categories).length; $('#stockValue').textContent = money(products.reduce((sum, product) => sum + product.preco_venda * product.quantidade_estoque, 0)); }
+function addLog(message) { state.changeLog.unshift({ empresa_id: activeCompanyId, message, date: new Date().toLocaleString('pt-AO') }); renderChangeLog(); }
+function renderChangeLog() { $('#changeLog').innerHTML = companyScoped(state.changeLog).slice(0, 8).map((log) => `<li><strong>${log.date}</strong> — ${log.message}</li>`).join('') || '<li>Nenhuma alteração registrada para esta empresa.</li>'; }
+function showMessage(text, type) { $('#formMessage').className = `message message--${type}`; $('#formMessage').textContent = text; }
 
-        if (scoreValue) scoreValue.textContent = `${analysis.score}/100`;
-        if (progressBar) {
-            progressBar.style.width = `${analysis.score}%`;
-            progressBar.style.backgroundColor = analysis.color;
-        }
-        if (levelBadge) {
-            levelBadge.textContent = analysis.level;
-            levelBadge.style.backgroundColor = analysis.color;
-        }
-        if (explanationText) explanationText.textContent = analysis.explanation;
-
-        if (negativeList) {
-            negativeList.innerHTML = '';
-            if (analysis.negatives.length === 0) {
-                negativeList.innerHTML = '<li>Nenhum sinal crítico detetado.</li>';
-            } else {
-                analysis.negatives.forEach(item => {
-                    negativeList.innerHTML += `<li style="color: #dc3545; list-style: none; margin: 5px 0;">⚠️ ${item}</li>`;
-                });
-            }
-        }
-
-        if (positiveList) {
-            positiveList.innerHTML = '';
-            if (analysis.positives.length === 0) {
-                positiveList.innerHTML = '<li>Nenhum indicador de validação formal encontrado.</li>';
-            } else {
-                analysis.positives.forEach(item => {
-                    positiveList.innerHTML += `<li style="color: #28a745; list-style: none; margin: 5px 0;">✅ ${item}</li>`;
-                });
-            }
-        }
-
-        // ELEMENTOS DA ETAPA 4: Injetar Interatividade de Feedback e Assistente (Requisitos 12, 14, 19)
-        let extraTools = document.querySelector('#extraTools');
-        if (!extraTools) {
-            extraTools = document.createElement('div');
-            extraTools.id = 'extraTools';
-            extraTools.style.marginTop = '25px';
-            extraTools.style.paddingTop = '20px';
-            extraTools.style.borderTop = '2px solid #f1f5f9';
-            resultCard.appendChild(extraTools);
-        }
-
-        extraTools.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <span style="font-size: 13px; color: #64748b; margin-right: 10px;">Esta análise foi útil?</span>
-                    <button onclick="alert('Obrigado pelo seu feedback positivo!')" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">👍 Sim</button>
-                    <button onclick="alert('Lamentamos o erro. O relatório foi enviado para a nossa equipa técnica para revisão.')" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-left: 5px;">👎 Não/Reportar Erro</button>
-                </div>
-                
-                <button onclick="alert('Relatório Executivo gerado com sucesso! A exportação estruturada para PDF será integrada na próxima fase de infraestrutura pública.')" style="background: #1e293b; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;">
-                    📥 Gerar Relatório Executivo
-                </button>
-            </div>
-
-            <div style="margin-top: 25px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px;">
-                <h5 style="margin: 0 0 10px 0; color: #0284c7; font-size: 14px;">🤖 Assistente de Credibilidade Digital</h5>
-                <p style="margin: 0 0 12px 0; font-size: 13px; color: #475569;">Clique nas dúvidas frequentes para que a IA justifique os critérios técnicos aplicados:</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="alert('O sistema analisa padrões linguísticos: o uso de múltiplos pontos de exclamação (!!!), termos sensacionalistas e ordens expressas de partilha reduzem a pontuação por indicarem comportamento típico de boatos virais.')" style="background: #fff; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #334155;">Como é calculada a nota?</button>
-                    <button onclick="alert('Para atingir Alta Confiabilidade (acima de 85 pontos), o texto precisa de conter referências explícitas a canais de imprensa oficiais, agências públicas (como a ANGOP) ou dados estatísticos percentuais sem alarmismo.')" style="background: #fff; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #334155;">O que valida uma notícia oficial?</button>
-                </div>
-            </div>
-        `;
-
-        if (resultCard) resultCard.style.display = 'block';
-    }
-
-    updateDashboard();
-});
+document.addEventListener('DOMContentLoaded', init);
