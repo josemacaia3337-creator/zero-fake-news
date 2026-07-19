@@ -1,27 +1,40 @@
-# Arquitetura do Módulo 2 — Cadastro de Produtos
+# Arquitetura do Módulo 3 — Cadastro de Fornecedores
 
 ## Visão geral
 
-O Módulo 2 do JPM Stock foi desenhado como um módulo SaaS multiempresa. Cada entidade operacional contém `empresa_id` e todas as operações passam por uma função de escopo que compara o registro com a empresa ativa da sessão. Isso impede que uma empresa liste, edite ou remova produtos e categorias de outra empresa.
+O Módulo 3 do JPM Stock mantém a arquitetura SaaS multiempresa já utilizada em produtos. Cada fornecedor e categoria de fornecedor possui `empresa_id`, e a interface nunca renderiza registros fora da empresa ativa da sessão. As mesmas regras devem ser aplicadas no backend/API: o `empresa_id` vem da autenticação, não do corpo das requisições.
 
-## Estrutura lógica
+## Estrutura de pastas
 
-- **Sessão multiempresa:** `activeCompanyId` representa a empresa autenticada no momento.
-- **Camada de validação:** valida campos obrigatórios, preços, quantidades, códigos duplicados dentro da mesma empresa e categoria pertencente à mesma empresa.
-- **Camada de estado:** simula tabelas `produtos`, `categorias` e `alteracoes` em memória para permitir evolução futura para API REST ou GraphQL.
-- **Camada de interface:** componentes de listagem, formulário, filtros, modais de confirmação e histórico são renderizados com base no escopo da empresa ativa.
-- **Camada de auditoria:** alterações relevantes de preço, categoria, estoque mínimo e exclusão são registradas em `changeLog`.
+```text
+zero-fake-news/
+├── database/
+│   └── schema.sql          # Modelo relacional com fornecedores, categorias e vínculos futuros
+├── docs/
+│   └── architecture.md     # Decisões de arquitetura multiempresa do módulo
+├── frontend/
+│   ├── index.html          # Espelho de interface para deploy em subpasta
+│   └── style.css           # Espelho dos estilos globais
+├── index.html              # Interface principal do JPM Stock
+├── script.js               # Estado simulado, validações, filtros e ações CRUD
+└── style.css               # Design responsivo e componentes reutilizáveis
+```
 
-## Segurança multiempresa
+## Camadas lógicas
 
-As regras aplicadas no front-end devem ser replicadas no backend:
+- **Sessão multiempresa:** `activeCompanyId` simula a empresa autenticada. A função `companyScoped` filtra fornecedores, categorias, produtos e auditoria por `empresa_id`.
+- **Gestão de fornecedores:** formulário único para criação e edição, lista com pesquisa por nome/telefone, filtro por categoria, ordenação e perfil detalhado.
+- **Categorias de fornecedores:** CRUD simples de categorias com validação de duplicidade por empresa e bloqueio de remoção quando há fornecedores associados.
+- **Exclusão segura:** a interface exige confirmação e marca `data_exclusao`, preparando soft delete sem remover produtos ou histórico relacionado.
+- **Integração com produtos:** produtos mantêm `fornecedor_id` para fornecedor principal e o banco inclui `produtos_fornecedores` para múltiplos fornecedores no futuro.
 
-1. Obter `empresa_id` somente do token/sessão autenticada.
-2. Nunca aceitar `empresa_id` livre do corpo da requisição para alterar escopo.
-3. Aplicar filtros por empresa em todas as consultas.
-4. Validar que `categoria_id` e `fornecedor_id` pertencem à mesma empresa antes de vincular ao produto.
-5. Usar índices únicos compostos por `empresa_id` para códigos internos.
+## Modelo do banco de dados
 
-## Preparação para futuras funcionalidades
+- `categorias_fornecedor`: categorias isoladas por empresa, com nome único por `empresa_id`.
+- `fornecedores`: cadastro cadastral completo, status controlado, NIF único por empresa, soft delete por `data_exclusao` e chave estrangeira composta para garantir que a categoria pertence à mesma empresa.
+- `produtos`: agora possui chave estrangeira composta para validar o fornecedor principal dentro da mesma empresa.
+- `produtos_fornecedores`: tabela de junção preparada para múltiplos fornecedores por produto, com flag `principal` para evolução futura.
 
-A modelagem mantém campos e pontos de extensão para código de barras, QR Code, leitores externos, relatórios, inteligência artificial e controle automático de estoque. A exclusão atual é confirmada na interface e a tabela já prevê a inclusão futura de colunas de soft delete, como `data_exclusao` e `excluido_por`.
+## Segurança e evolução futura
+
+As consultas produtivas devem sempre usar `WHERE empresa_id = :empresa_id_autenticado AND data_exclusao IS NULL` para fornecedores. Atualizações e exclusões devem validar posse do registro pela empresa ativa antes de qualquer alteração. O desenho suporta módulos futuros de compras, entrada de mercadorias, histórico, avaliação de desempenho e recomendações por IA sem alterar o isolamento multiempresa.

@@ -4,27 +4,31 @@ const companies = [
 ];
 
 let activeCompanyId = 1;
-let deleteTargetId = null;
+let deleteTarget = null;
 
 const state = {
-  categories: [
-    { id: 1, empresa_id: 1, nome: 'Bebidas', descricao: 'Águas, sumos e refrigerantes', data_criacao: '2026-07-01' },
-    { id: 2, empresa_id: 1, nome: 'Alimentação', descricao: 'Produtos alimentares em geral', data_criacao: '2026-07-01' },
-    { id: 3, empresa_id: 1, nome: 'Higiene', descricao: 'Higiene pessoal e limpeza', data_criacao: '2026-07-02' },
-    { id: 4, empresa_id: 2, nome: 'Medicamentos', descricao: 'Produtos farmacêuticos', data_criacao: '2026-07-03' },
+  supplierCategories: [
+    { id: 1, empresa_id: 1, nome: 'Distribuidor alimentar', descricao: 'Alimentos, bebidas e bens de consumo', data_criacao: '2026-07-01' },
+    { id: 2, empresa_id: 1, nome: 'Importador', descricao: 'Produtos importados e cargas internacionais', data_criacao: '2026-07-02' },
+    { id: 3, empresa_id: 1, nome: 'Fornecedor local', descricao: 'Fornecimento regional recorrente', data_criacao: '2026-07-03' },
+    { id: 4, empresa_id: 2, nome: 'Fabricante farmacêutico', descricao: 'Medicamentos e materiais de saúde', data_criacao: '2026-07-03' },
+  ],
+  suppliers: [
+    { id: 1, empresa_id: 1, categoria_id: 1, nome_empresa: 'AgroDistribuição Lda', nome_responsavel: 'Maria José', nif: '5410000012', telefone: '+244 923 000 111', email: 'comercial@agrodist.co.ao', endereco: 'Rua do Comércio, armazém 12', cidade: 'Luanda', pais: 'Angola', observacoes: 'Entrega às terças e quintas.', status: 'ativo', data_criacao: '2026-07-10', data_atualizacao: '2026-07-10', data_exclusao: null },
+    { id: 2, empresa_id: 1, categoria_id: 2, nome_empresa: 'Bebidas Sul', nome_responsavel: 'Carlos Manuel', nif: '5410000020', telefone: '+244 924 000 222', email: 'vendas@bebidassul.ao', endereco: 'Zona Industrial de Viana', cidade: 'Luanda', pais: 'Angola', observacoes: 'Importador de águas e sumos.', status: 'ativo', data_criacao: '2026-07-11', data_atualizacao: '2026-07-12', data_exclusao: null },
+    { id: 3, empresa_id: 2, categoria_id: 4, nome_empresa: 'Saúde Global', nome_responsavel: 'Helena Costa', nif: '7420000099', telefone: '+244 925 000 333', email: 'supply@saudeglobal.ao', endereco: 'Avenida da Saúde, 77', cidade: 'Benguela', pais: 'Angola', observacoes: 'Documentação sanitária validada.', status: 'ativo', data_criacao: '2026-07-12', data_atualizacao: '2026-07-12', data_exclusao: null },
   ],
   products: [
-    { id: 1, empresa_id: 1, categoria_id: 2, fornecedor_id: null, fornecedor_nome: 'AgroDistribuição Lda', nome: 'Arroz agulha 5kg', codigo_produto: 'ALI-001', codigo_barras: '5601000000012', descricao: 'Saco de arroz branco tipo agulha.', unidade_medida: 'pct', preco_compra: 3500, preco_venda: 4550, quantidade_estoque: 42, estoque_minimo: 12, data_criacao: '2026-07-10', data_atualizacao: '2026-07-10' },
-    { id: 2, empresa_id: 1, categoria_id: 1, fornecedor_id: null, fornecedor_nome: 'Bebidas Sul', nome: 'Água mineral 1.5L', codigo_produto: 'BEB-014', codigo_barras: '5601000000142', descricao: 'Garrafa de água mineral sem gás.', unidade_medida: 'un', preco_compra: 180, preco_venda: 260, quantidade_estoque: 8, estoque_minimo: 20, data_criacao: '2026-07-11', data_atualizacao: '2026-07-12' },
-    { id: 3, empresa_id: 2, categoria_id: 4, fornecedor_id: null, fornecedor_nome: 'Saúde Global', nome: 'Paracetamol 500mg', codigo_produto: 'MED-001', codigo_barras: '7890000001110', descricao: 'Caixa com comprimidos.', unidade_medida: 'cx', preco_compra: 900, preco_venda: 1250, quantidade_estoque: 120, estoque_minimo: 25, data_criacao: '2026-07-12', data_atualizacao: '2026-07-12' },
+    { id: 1, empresa_id: 1, fornecedor_id: 1, nome: 'Arroz agulha 5kg', codigo_produto: 'ALI-001', quantidade_estoque: 42, estoque_minimo: 12 },
+    { id: 2, empresa_id: 1, fornecedor_id: 2, nome: 'Água mineral 1.5L', codigo_produto: 'BEB-014', quantidade_estoque: 8, estoque_minimo: 20 },
+    { id: 3, empresa_id: 2, fornecedor_id: 3, nome: 'Paracetamol 500mg', codigo_produto: 'MED-001', quantidade_estoque: 120, estoque_minimo: 25 },
   ],
   changeLog: [],
 };
 
 const $ = (selector) => document.querySelector(selector);
-const companyScoped = (items) => items.filter((item) => item.empresa_id === activeCompanyId);
+const companyScoped = (items) => items.filter((item) => item.empresa_id === activeCompanyId && !item.data_exclusao);
 const today = () => new Date().toISOString().slice(0, 10);
-const money = (value) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA', maximumFractionDigits: 0 }).format(value).replace('AOA', 'Kz');
 const nextId = (items) => Math.max(0, ...items.map((item) => item.id)) + 1;
 
 function init() {
@@ -37,159 +41,166 @@ function init() {
 function bindEvents() {
   $('#companySwitcher').addEventListener('change', (event) => {
     activeCompanyId = Number(event.target.value);
-    resetProductForm();
-    resetCategoryForm();
+    resetSupplierForm();
+    resetSupplierCategoryForm();
     renderAll();
   });
-  $('#productForm').addEventListener('submit', saveProduct);
-  $('#cancelEdit').addEventListener('click', resetProductForm);
-  $('#categoryForm').addEventListener('submit', saveCategory);
-  $('#cancelCategoryEdit').addEventListener('click', resetCategoryForm);
-  ['#searchName', '#searchCode', '#categoryFilter', '#sortProducts'].forEach((selector) => $(selector).addEventListener('input', renderProducts));
-  $('#confirmDelete').addEventListener('click', confirmDeleteProduct);
+  $('#supplierForm').addEventListener('submit', saveSupplier);
+  $('#cancelSupplierEdit').addEventListener('click', resetSupplierForm);
+  $('#supplierCategoryForm').addEventListener('submit', saveSupplierCategory);
+  $('#cancelSupplierCategoryEdit').addEventListener('click', resetSupplierCategoryForm);
+  ['#supplierSearchName', '#supplierSearchPhone', '#supplierCategoryFilter', '#sortSuppliers'].forEach((selector) => $(selector).addEventListener('input', renderSuppliers));
+  $('#confirmDelete').addEventListener('click', confirmDeleteSupplier);
   $('#cancelDelete').addEventListener('click', closeDeleteModal);
 }
 
 function renderAll() {
-  renderCategoryOptions();
+  renderSupplierCategoryOptions();
+  renderSuppliers();
+  renderSupplierCategories();
   renderProducts();
-  renderCategories();
   renderMetrics();
   renderChangeLog();
 }
 
-function renderCategoryOptions() {
-  const categories = companyScoped(state.categories);
-  const options = categories.map((category) => `<option value="${category.id}">${category.nome}</option>`).join('');
-  $('#categoryId').innerHTML = `<option value="">Selecione</option>${options}`;
-  $('#categoryFilter').innerHTML = `<option value="">Todas as categorias</option>${options}`;
+function renderSupplierCategoryOptions() {
+  const options = companyScoped(state.supplierCategories).map((category) => `<option value="${category.id}">${category.nome}</option>`).join('');
+  $('#supplierCategoryId').innerHTML = `<option value="">Selecione</option>${options}`;
+  $('#supplierCategoryFilter').innerHTML = `<option value="">Todas as categorias</option>${options}`;
 }
 
-function getCategoryName(categoryId) {
-  return companyScoped(state.categories).find((category) => category.id === Number(categoryId))?.nome || 'Sem categoria';
+function getSupplierCategoryName(categoryId) {
+  return companyScoped(state.supplierCategories).find((category) => category.id === Number(categoryId))?.nome || 'Sem categoria';
 }
 
-function stockStatus(product) {
+function getSupplierName(supplierId) {
+  return companyScoped(state.suppliers).find((supplier) => supplier.id === Number(supplierId))?.nome_empresa || 'Sem fornecedor vinculado';
+}
+
+function statusLabel(status) {
+  const map = { ativo: ['Ativo', 'ok'], inativo: ['Inativo', 'low'], bloqueado: ['Bloqueado', 'out'] };
+  return map[status] || ['Indefinido', 'low'];
+}
+
+function productStatus(product) {
   if (product.quantidade_estoque <= 0) return ['Esgotado', 'out'];
   if (product.quantidade_estoque <= product.estoque_minimo) return ['Baixo estoque', 'low'];
   return ['Disponível', 'ok'];
 }
 
-function renderProducts() {
-  const name = $('#searchName').value.trim().toLowerCase();
-  const code = $('#searchCode').value.trim().toLowerCase();
-  const category = Number($('#categoryFilter').value || 0);
-  const sort = $('#sortProducts').value;
-  const products = companyScoped(state.products)
-    .filter((product) => product.nome.toLowerCase().includes(name))
-    .filter((product) => product.codigo_produto.toLowerCase().includes(code) || (product.codigo_barras || '').toLowerCase().includes(code))
-    .filter((product) => !category || product.categoria_id === category)
-    .sort((a, b) => typeof a[sort] === 'number' ? a[sort] - b[sort] : String(a[sort]).localeCompare(String(b[sort]), 'pt'));
+function renderSuppliers() {
+  const name = $('#supplierSearchName').value.trim().toLowerCase();
+  const phone = $('#supplierSearchPhone').value.trim().toLowerCase();
+  const category = Number($('#supplierCategoryFilter').value || 0);
+  const sort = $('#sortSuppliers').value;
+  const suppliers = companyScoped(state.suppliers)
+    .filter((supplier) => supplier.nome_empresa.toLowerCase().includes(name))
+    .filter((supplier) => supplier.telefone.toLowerCase().includes(phone))
+    .filter((supplier) => !category || supplier.categoria_id === category)
+    .sort((a, b) => String(a[sort] || '').localeCompare(String(b[sort] || ''), 'pt'));
 
-  $('#productsTable').innerHTML = products.map((product) => {
-    const [label, type] = stockStatus(product);
-    return `<tr><td><strong>${product.nome}</strong><br><small>${product.descricao || 'Sem descrição'}</small></td><td>${product.codigo_produto}<br><small>${product.codigo_barras || 'Sem código de barras'}</small></td><td>${getCategoryName(product.categoria_id)}</td><td>${product.quantidade_estoque} ${product.unidade_medida}</td><td>${money(product.preco_venda)}</td><td><span class="status status--${type}">${label}</span></td><td><div class="row-actions"><button class="icon-button" data-edit="${product.id}">Editar</button><button class="icon-button icon-button--danger" data-delete="${product.id}">Excluir</button></div></td></tr>`;
-  }).join('') || '<tr><td colspan="7">Nenhum produto encontrado para esta empresa.</td></tr>';
+  $('#suppliersTable').innerHTML = suppliers.map((supplier) => {
+    const [label, type] = statusLabel(supplier.status);
+    return `<tr><td><strong>${supplier.nome_empresa}</strong><br><small>NIF ${supplier.nif}</small></td><td>${supplier.nome_responsavel}</td><td>${supplier.telefone}</td><td>${supplier.email || 'Sem email'}</td><td>${getSupplierCategoryName(supplier.categoria_id)}</td><td><span class="status status--${type}">${label}</span></td><td><div class="row-actions"><button class="icon-button" data-detail-supplier="${supplier.id}">Detalhes</button><button class="icon-button" data-edit-supplier="${supplier.id}">Editar</button><button class="icon-button icon-button--danger" data-delete-supplier="${supplier.id}">Excluir</button></div></td></tr>`;
+  }).join('') || '<tr><td colspan="7">Nenhum fornecedor encontrado para esta empresa.</td></tr>';
 
-  document.querySelectorAll('[data-edit]').forEach((button) => button.addEventListener('click', () => editProduct(Number(button.dataset.edit))));
-  document.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => openDeleteModal(Number(button.dataset.delete))));
-  renderMetrics();
+  document.querySelectorAll('[data-detail-supplier]').forEach((button) => button.addEventListener('click', () => renderSupplierProfile(Number(button.dataset.detailSupplier))));
+  document.querySelectorAll('[data-edit-supplier]').forEach((button) => button.addEventListener('click', () => editSupplier(Number(button.dataset.editSupplier))));
+  document.querySelectorAll('[data-delete-supplier]').forEach((button) => button.addEventListener('click', () => openDeleteModal(Number(button.dataset.deleteSupplier))));
 }
 
-function collectProductForm() {
-  return {
-    nome: $('#productName').value.trim(), codigo_produto: $('#productCode').value.trim(), codigo_barras: $('#barcode').value.trim(), categoria_id: Number($('#categoryId').value), fornecedor_nome: $('#supplier').value.trim(), descricao: $('#description').value.trim(), unidade_medida: $('#unit').value, preco_compra: Number($('#purchasePrice').value), preco_venda: Number($('#salePrice').value), quantidade_estoque: Number($('#stockQuantity').value), estoque_minimo: Number($('#minimumStock').value),
-  };
+function collectSupplierForm() {
+  return { nome_empresa: $('#supplierCompanyName').value.trim(), nome_responsavel: $('#supplierContactName').value.trim(), nif: $('#supplierNif').value.trim(), telefone: $('#supplierPhone').value.trim(), email: $('#supplierEmail').value.trim(), categoria_id: Number($('#supplierCategoryId').value), endereco: $('#supplierAddress').value.trim(), cidade: $('#supplierCity').value.trim(), pais: $('#supplierCountry').value.trim(), status: $('#supplierStatus').value, observacoes: $('#supplierNotes').value.trim() };
 }
 
-function validateProduct(payload, editingId = null) {
-  if (!payload.nome || !payload.codigo_produto || !payload.categoria_id || !payload.unidade_medida) return 'Preencha nome, código interno, categoria e unidade de medida.';
-  if ([payload.preco_compra, payload.preco_venda, payload.quantidade_estoque, payload.estoque_minimo].some((value) => Number.isNaN(value) || value < 0)) return 'Preços e quantidades não podem ser negativos.';
-  if (!companyScoped(state.categories).some((category) => category.id === payload.categoria_id)) return 'Categoria inválida para a empresa ativa.';
-  const duplicatedCode = companyScoped(state.products).some((product) => product.codigo_produto === payload.codigo_produto && product.id !== editingId);
-  return duplicatedCode ? 'Código interno já utilizado nesta empresa.' : '';
+function validateSupplier(payload, editingId = null) {
+  if (!payload.nome_empresa || !payload.nome_responsavel || !payload.nif || !payload.telefone || !payload.categoria_id) return 'Preencha nome da empresa, responsável, NIF, telefone e categoria.';
+  if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) return 'Informe um email válido.';
+  if (!companyScoped(state.supplierCategories).some((category) => category.id === payload.categoria_id)) return 'Categoria inválida para a empresa ativa.';
+  const duplicateNif = companyScoped(state.suppliers).some((supplier) => supplier.nif === payload.nif && supplier.id !== editingId);
+  return duplicateNif ? 'NIF já utilizado por outro fornecedor desta empresa.' : '';
 }
 
-function saveProduct(event) {
+function saveSupplier(event) {
   event.preventDefault();
-  const editingId = Number($('#productId').value || 0);
-  const payload = collectProductForm();
-  const error = validateProduct(payload, editingId || null);
-  if (error) return showMessage(error, 'error');
-
+  const editingId = Number($('#supplierId').value || 0);
+  const payload = collectSupplierForm();
+  const error = validateSupplier(payload, editingId || null);
+  if (error) return showSupplierMessage(error, 'error');
   if (editingId) {
-    const product = state.products.find((item) => item.id === editingId && item.empresa_id === activeCompanyId);
-    if (!product) return showMessage('Produto não encontrado no escopo da empresa.', 'error');
-    registerProductChanges(product, payload);
-    Object.assign(product, payload, { data_atualizacao: today() });
-    showMessage('Produto atualizado com segurança.', 'success');
+    const supplier = state.suppliers.find((item) => item.id === editingId && item.empresa_id === activeCompanyId && !item.data_exclusao);
+    if (!supplier) return showSupplierMessage('Fornecedor não encontrado no escopo da empresa.', 'error');
+    Object.assign(supplier, payload, { data_atualizacao: today() });
+    addLog(`Fornecedor "${payload.nome_empresa}" atualizado.`);
+    showSupplierMessage('Fornecedor atualizado com segurança.', 'success');
   } else {
-    state.products.push({ id: nextId(state.products), empresa_id: activeCompanyId, fornecedor_id: null, ...payload, data_criacao: today(), data_atualizacao: today() });
-    addLog(`Produto "${payload.nome}" cadastrado.`);
-    showMessage('Produto cadastrado com sucesso.', 'success');
+    state.suppliers.push({ id: nextId(state.suppliers), empresa_id: activeCompanyId, ...payload, data_criacao: today(), data_atualizacao: today(), data_exclusao: null });
+    addLog(`Fornecedor "${payload.nome_empresa}" cadastrado.`);
+    showSupplierMessage('Fornecedor cadastrado com sucesso.', 'success');
   }
-  resetProductForm(false);
+  resetSupplierForm(false);
   renderAll();
 }
 
-function registerProductChanges(oldProduct, nextProduct) {
-  [['preco_compra', 'preço de compra'], ['preco_venda', 'preço de venda'], ['categoria_id', 'categoria'], ['estoque_minimo', 'estoque mínimo']].forEach(([field, label]) => {
-    if (oldProduct[field] !== nextProduct[field]) addLog(`Alterado ${label} do produto "${oldProduct.nome}".`);
-  });
+function editSupplier(id) {
+  const supplier = state.suppliers.find((item) => item.id === id && item.empresa_id === activeCompanyId && !item.data_exclusao);
+  if (!supplier) return showSupplierMessage('Acesso negado: fornecedor pertence a outra empresa.', 'error');
+  $('#supplierId').value = supplier.id; $('#supplierCompanyName').value = supplier.nome_empresa; $('#supplierContactName').value = supplier.nome_responsavel; $('#supplierNif').value = supplier.nif; $('#supplierPhone').value = supplier.telefone; $('#supplierEmail').value = supplier.email || ''; $('#supplierCategoryId').value = supplier.categoria_id; $('#supplierAddress').value = supplier.endereco || ''; $('#supplierCity').value = supplier.cidade || ''; $('#supplierCountry').value = supplier.pais || ''; $('#supplierStatus').value = supplier.status; $('#supplierNotes').value = supplier.observacoes || '';
+  $('#submitSupplier').textContent = 'Atualizar fornecedor';
+  location.hash = 'supplier-form-section';
 }
 
-function editProduct(id) {
-  const product = state.products.find((item) => item.id === id && item.empresa_id === activeCompanyId);
-  if (!product) return showMessage('Acesso negado: produto pertence a outra empresa.', 'error');
-  $('#productId').value = product.id; $('#productName').value = product.nome; $('#productCode').value = product.codigo_produto; $('#barcode').value = product.codigo_barras || ''; $('#categoryId').value = product.categoria_id; $('#unit').value = product.unidade_medida; $('#supplier').value = product.fornecedor_nome || ''; $('#purchasePrice').value = product.preco_compra; $('#salePrice').value = product.preco_venda; $('#stockQuantity').value = product.quantidade_estoque; $('#minimumStock').value = product.estoque_minimo; $('#description').value = product.descricao || '';
-  $('#submitProduct').textContent = 'Atualizar produto';
-  location.hash = 'product-form-section';
+function renderSupplierProfile(id) {
+  const supplier = state.suppliers.find((item) => item.id === id && item.empresa_id === activeCompanyId && !item.data_exclusao);
+  if (!supplier) return showSupplierMessage('Acesso negado ao perfil do fornecedor.', 'error');
+  $('#supplierProfile').innerHTML = `<article class="profile-card"><h3>${supplier.nome_empresa}</h3><p><strong>Responsável:</strong> ${supplier.nome_responsavel}</p><p><strong>NIF:</strong> ${supplier.nif}</p><p><strong>Categoria:</strong> ${getSupplierCategoryName(supplier.categoria_id)}</p><p><strong>Status:</strong> ${statusLabel(supplier.status)[0]}</p></article><article class="profile-card"><h3>Contactos e endereço</h3><p><strong>Telefone:</strong> ${supplier.telefone}</p><p><strong>Email:</strong> ${supplier.email || 'Sem email'}</p><p><strong>Endereço:</strong> ${supplier.endereco || 'Não informado'}, ${supplier.cidade || 'cidade não informada'}, ${supplier.pais || 'país não informado'}</p><p><strong>Observações:</strong> ${supplier.observacoes || 'Sem observações'}</p></article><article class="profile-card profile-card--future"><h3>Preparação futura</h3><p>Produtos fornecidos, histórico de compras, valores movimentados e última compra serão integrados ao módulo de compras sem quebrar o isolamento por empresa.</p></article>`;
+  location.hash = 'supplier-profile';
 }
 
-function resetProductForm(clearMessage = true) {
-  $('#productForm').reset(); $('#productId').value = ''; $('#submitProduct').textContent = 'Salvar produto';
-  if (clearMessage) $('#formMessage').textContent = '';
-}
+function resetSupplierForm(clearMessage = true) { $('#supplierForm').reset(); $('#supplierId').value = ''; $('#submitSupplier').textContent = 'Salvar fornecedor'; if (clearMessage) $('#supplierFormMessage').textContent = ''; }
+function showSupplierMessage(text, type) { $('#supplierFormMessage').className = `message message--${type}`; $('#supplierFormMessage').textContent = text; }
 
 function openDeleteModal(id) {
-  const product = state.products.find((item) => item.id === id && item.empresa_id === activeCompanyId);
-  if (!product) return showMessage('Acesso negado: produto fora da empresa ativa.', 'error');
-  deleteTargetId = id; $('#confirmText').textContent = `Tem certeza que deseja excluir "${product.nome}"? Esta ação está preparada para futura exclusão lógica.`; $('#confirmModal').hidden = false;
+  const supplier = state.suppliers.find((item) => item.id === id && item.empresa_id === activeCompanyId && !item.data_exclusao);
+  if (!supplier) return showSupplierMessage('Acesso negado: fornecedor fora da empresa ativa.', 'error');
+  deleteTarget = id; $('#confirmText').textContent = `Tem certeza que deseja excluir "${supplier.nome_empresa}"? A operação usa exclusão lógica e não remove produtos vinculados.`; $('#confirmModal').hidden = false;
 }
-function closeDeleteModal() { deleteTargetId = null; $('#confirmModal').hidden = true; }
-function confirmDeleteProduct() {
-  const product = state.products.find((item) => item.id === deleteTargetId && item.empresa_id === activeCompanyId);
-  if (product) { state.products = state.products.filter((item) => item.id !== product.id); addLog(`Produto "${product.nome}" excluído com confirmação.`); }
+function closeDeleteModal() { deleteTarget = null; $('#confirmModal').hidden = true; }
+function confirmDeleteSupplier() {
+  const supplier = state.suppliers.find((item) => item.id === deleteTarget && item.empresa_id === activeCompanyId && !item.data_exclusao);
+  if (supplier) { Object.assign(supplier, { status: 'inativo', data_exclusao: today(), data_atualizacao: today() }); addLog(`Fornecedor "${supplier.nome_empresa}" marcado como excluído.`); }
   closeDeleteModal(); renderAll();
 }
 
-function saveCategory(event) {
+function saveSupplierCategory(event) {
   event.preventDefault();
-  const id = Number($('#categoryEditId').value || 0); const nome = $('#categoryName').value.trim(); const descricao = $('#categoryDescription').value.trim();
+  const id = Number($('#supplierCategoryEditId').value || 0); const nome = $('#supplierCategoryName').value.trim(); const descricao = $('#supplierCategoryDescription').value.trim();
   if (!nome) return;
-  const duplicate = companyScoped(state.categories).some((category) => category.nome.toLowerCase() === nome.toLowerCase() && category.id !== id);
-  if (duplicate) return alert('Categoria já existe nesta empresa.');
-  if (id) { const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); Object.assign(category, { nome, descricao }); addLog(`Categoria "${nome}" atualizada.`); }
-  else { state.categories.push({ id: nextId(state.categories), empresa_id: activeCompanyId, nome, descricao, data_criacao: today() }); addLog(`Categoria "${nome}" criada.`); }
-  resetCategoryForm(); renderAll();
+  const duplicate = companyScoped(state.supplierCategories).some((category) => category.nome.toLowerCase() === nome.toLowerCase() && category.id !== id);
+  if (duplicate) return alert('Categoria de fornecedor já existe nesta empresa.');
+  if (id) { const category = state.supplierCategories.find((item) => item.id === id && item.empresa_id === activeCompanyId); Object.assign(category, { nome, descricao }); addLog(`Categoria de fornecedor "${nome}" atualizada.`); }
+  else { state.supplierCategories.push({ id: nextId(state.supplierCategories), empresa_id: activeCompanyId, nome, descricao, data_criacao: today() }); addLog(`Categoria de fornecedor "${nome}" criada.`); }
+  resetSupplierCategoryForm(); renderAll();
 }
 
-function renderCategories() {
-  $('#categoriesList').innerHTML = companyScoped(state.categories).map((category) => `<article class="category-card"><h3>${category.nome}</h3><p>${category.descricao || 'Sem descrição'}</p><small>Criada em ${category.data_criacao}</small><div class="row-actions"><button class="icon-button" data-edit-category="${category.id}">Editar</button><button class="icon-button icon-button--danger" data-remove-category="${category.id}">Remover</button></div></article>`).join('');
-  document.querySelectorAll('[data-edit-category]').forEach((button) => button.addEventListener('click', () => editCategory(Number(button.dataset.editCategory))));
-  document.querySelectorAll('[data-remove-category]').forEach((button) => button.addEventListener('click', () => removeCategory(Number(button.dataset.removeCategory))));
+function renderSupplierCategories() {
+  $('#supplierCategoriesList').innerHTML = companyScoped(state.supplierCategories).map((category) => `<article class="category-card"><h3>${category.nome}</h3><p>${category.descricao || 'Sem descrição'}</p><small>Criada em ${category.data_criacao}</small><div class="row-actions"><button class="icon-button" data-edit-supplier-category="${category.id}">Editar</button><button class="icon-button icon-button--danger" data-remove-supplier-category="${category.id}">Remover</button></div></article>`).join('');
+  document.querySelectorAll('[data-edit-supplier-category]').forEach((button) => button.addEventListener('click', () => editSupplierCategory(Number(button.dataset.editSupplierCategory))));
+  document.querySelectorAll('[data-remove-supplier-category]').forEach((button) => button.addEventListener('click', () => removeSupplierCategory(Number(button.dataset.removeSupplierCategory))));
 }
-function editCategory(id) { const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); $('#categoryEditId').value = category.id; $('#categoryName').value = category.nome; $('#categoryDescription').value = category.descricao || ''; }
-function removeCategory(id) {
-  if (companyScoped(state.products).some((product) => product.categoria_id === id)) return alert('Categoria possui produtos associados. Altere os produtos antes de remover.');
-  const category = state.categories.find((item) => item.id === id && item.empresa_id === activeCompanyId); if (!category) return;
-  if (confirm(`Remover a categoria "${category.nome}"?`)) { state.categories = state.categories.filter((item) => item.id !== id); addLog(`Categoria "${category.nome}" removida.`); renderAll(); }
+function editSupplierCategory(id) { const category = state.supplierCategories.find((item) => item.id === id && item.empresa_id === activeCompanyId); $('#supplierCategoryEditId').value = category.id; $('#supplierCategoryName').value = category.nome; $('#supplierCategoryDescription').value = category.descricao || ''; }
+function removeSupplierCategory(id) {
+  if (companyScoped(state.suppliers).some((supplier) => supplier.categoria_id === id)) return alert('Categoria possui fornecedores associados. Altere os fornecedores antes de remover.');
+  const category = state.supplierCategories.find((item) => item.id === id && item.empresa_id === activeCompanyId); if (!category) return;
+  if (confirm(`Remover a categoria "${category.nome}"?`)) { state.supplierCategories = state.supplierCategories.filter((item) => item.id !== id); addLog(`Categoria de fornecedor "${category.nome}" removida.`); renderAll(); }
 }
-function resetCategoryForm() { $('#categoryForm').reset(); $('#categoryEditId').value = ''; }
+function resetSupplierCategoryForm() { $('#supplierCategoryForm').reset(); $('#supplierCategoryEditId').value = ''; }
 
-function renderMetrics() { const products = companyScoped(state.products); $('#totalProducts').textContent = products.length; $('#lowStockProducts').textContent = products.filter((product) => product.quantidade_estoque <= product.estoque_minimo).length; $('#totalCategories').textContent = companyScoped(state.categories).length; $('#stockValue').textContent = money(products.reduce((sum, product) => sum + product.preco_venda * product.quantidade_estoque, 0)); }
+function renderProducts() {
+  $('#productsTable').innerHTML = companyScoped(state.products).map((product) => { const [label, type] = productStatus(product); return `<tr><td><strong>${product.nome}</strong></td><td>${product.codigo_produto}</td><td>${getSupplierName(product.fornecedor_id)}</td><td><span class="status status--${type}">${label}</span></td></tr>`; }).join('') || '<tr><td colspan="4">Nenhum produto vinculado para esta empresa.</td></tr>';
+}
+function renderMetrics() { const suppliers = companyScoped(state.suppliers); $('#totalSuppliers').textContent = suppliers.length; $('#activeSuppliers').textContent = suppliers.filter((supplier) => supplier.status === 'ativo').length; $('#totalSupplierCategories').textContent = companyScoped(state.supplierCategories).length; $('#linkedProducts').textContent = companyScoped(state.products).filter((product) => product.fornecedor_id).length; }
 function addLog(message) { state.changeLog.unshift({ empresa_id: activeCompanyId, message, date: new Date().toLocaleString('pt-AO') }); renderChangeLog(); }
 function renderChangeLog() { $('#changeLog').innerHTML = companyScoped(state.changeLog).slice(0, 8).map((log) => `<li><strong>${log.date}</strong> — ${log.message}</li>`).join('') || '<li>Nenhuma alteração registrada para esta empresa.</li>'; }
-function showMessage(text, type) { $('#formMessage').className = `message message--${type}`; $('#formMessage').textContent = text; }
 
 document.addEventListener('DOMContentLoaded', init);

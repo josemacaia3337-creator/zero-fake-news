@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JPM Stock | Cadastro de Produtos</title>
+  <title>JPM Stock | Cadastro de Fornecedores</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -18,98 +18,87 @@
       </a>
       <nav class="nav-card">
         <a href="#dashboard">Dashboard</a>
+        <a href="#suppliers">Fornecedores</a>
+        <a href="#supplier-form-section">Cadastrar fornecedor</a>
+        <a href="#supplier-categories">Categorias de fornecedores</a>
         <a href="#products">Produtos</a>
-        <a href="#product-form-section">Cadastrar produto</a>
-        <a href="#categories">Categorias</a>
       </nav>
       <section class="tenant-card" aria-labelledby="tenant-title">
         <p class="eyebrow">Empresa ativa</p>
         <h2 id="tenant-title">Sessão segura</h2>
         <select id="companySwitcher" aria-label="Alternar empresa para simulação multiempresa"></select>
-        <p>Todos os produtos e categorias são filtrados pelo <strong>empresa_id</strong> autenticado.</p>
+        <p>Todos os fornecedores, categorias e vínculos com produtos são filtrados pelo <strong>empresa_id</strong> autenticado.</p>
       </section>
     </aside>
 
     <div class="page-content">
       <header class="hero" id="dashboard">
         <div>
-          <p class="eyebrow">Módulo 2</p>
-          <h1>Cadastro de Produtos</h1>
-          <p>Organize produtos, categorias, preços e estoque mínimo com isolamento total entre empresas.</p>
+          <p class="eyebrow">Módulo 3</p>
+          <h1>Cadastro de Fornecedores</h1>
+          <p>Cadastre, consulte e organize fornecedores com isolamento total entre empresas.</p>
         </div>
         <div class="hero-actions">
-          <a class="button button--primary" href="#product-form-section">Novo produto</a>
-          <a class="button button--secondary" href="#categories">Gerir categorias</a>
+          <a class="button button--primary" href="#supplier-form-section">Novo fornecedor</a>
+          <a class="button button--secondary" href="#supplier-categories">Gerir categorias</a>
         </div>
       </header>
 
       <main>
-        <section class="metrics-grid" aria-label="Resumo do estoque">
-          <article class="metric"><span>Total de produtos</span><strong id="totalProducts">0</strong></article>
-          <article class="metric"><span>Baixo estoque</span><strong id="lowStockProducts">0</strong></article>
-          <article class="metric"><span>Categorias</span><strong id="totalCategories">0</strong></article>
-          <article class="metric"><span>Valor de venda</span><strong id="stockValue">Kz 0</strong></article>
+        <section class="metrics-grid" aria-label="Resumo de fornecedores">
+          <article class="metric"><span>Total de fornecedores</span><strong id="totalSuppliers">0</strong></article>
+          <article class="metric"><span>Fornecedores ativos</span><strong id="activeSuppliers">0</strong></article>
+          <article class="metric"><span>Categorias</span><strong id="totalSupplierCategories">0</strong></article>
+          <article class="metric"><span>Produtos vinculados</span><strong id="linkedProducts">0</strong></article>
         </section>
 
-        <section class="panel" id="product-form-section" aria-labelledby="product-form-title">
+        <section class="panel" id="supplier-form-section" aria-labelledby="supplier-form-title">
           <div class="section-heading">
             <p class="eyebrow">Cadastro e edição</p>
-            <h2 id="product-form-title">Dados do produto</h2>
-            <p>Campos validados, código interno único por empresa e vínculo obrigatório ao escopo da empresa ativa.</p>
+            <h2 id="supplier-form-title">Dados do fornecedor</h2>
+            <p>Campos validados, NIF único por empresa e categoria obrigatoriamente pertencente à empresa ativa.</p>
           </div>
-          <form id="productForm" class="form-grid">
-            <input type="hidden" id="productId">
-            <label>Nome do produto<input id="productName" required maxlength="160" placeholder="Ex.: Arroz agulha 5kg"></label>
-            <label>Código interno<input id="productCode" required maxlength="80" placeholder="PRD-001"></label>
-            <label>Código de barras<input id="barcode" maxlength="80" inputmode="numeric" placeholder="5600000000000"></label>
-            <label>Categoria<select id="categoryId" required></select></label>
-            <label>Unidade de medida<select id="unit" required><option>un</option><option>kg</option><option>g</option><option>l</option><option>ml</option><option>cx</option><option>pct</option></select></label>
-            <label>Fornecedor principal<input id="supplier" maxlength="120" placeholder="Fornecedor"></label>
-            <label>Preço de compra<input id="purchasePrice" required type="number" min="0" step="0.01"></label>
-            <label>Preço de venda<input id="salePrice" required type="number" min="0" step="0.01"></label>
-            <label>Quantidade inicial em estoque<input id="stockQuantity" required type="number" min="0" step="0.001"></label>
-            <label>Estoque mínimo<input id="minimumStock" required type="number" min="0" step="0.001"></label>
-            <label class="full">Descrição<textarea id="description" rows="4" maxlength="600" placeholder="Descrição, variações, marca ou observações"></textarea></label>
+          <form id="supplierForm" class="form-grid">
+            <input type="hidden" id="supplierId">
+            <label>Nome da empresa fornecedora<input id="supplierCompanyName" required maxlength="180" placeholder="Ex.: AgroDistribuição Lda"></label>
+            <label>Nome do responsável<input id="supplierContactName" required maxlength="160" placeholder="Ex.: Maria José"></label>
+            <label>NIF<input id="supplierNif" required maxlength="60" placeholder="5000000000"></label>
+            <label>Telefone<input id="supplierPhone" required maxlength="40" placeholder="+244 900 000 000"></label>
+            <label>Email<input id="supplierEmail" type="email" maxlength="160" placeholder="comercial@fornecedor.co.ao"></label>
+            <label>Categoria<select id="supplierCategoryId" required></select></label>
+            <label>Endereço<input id="supplierAddress" maxlength="220" placeholder="Rua, bairro, referência"></label>
+            <label>Cidade<input id="supplierCity" maxlength="120" placeholder="Luanda"></label>
+            <label>País<input id="supplierCountry" maxlength="120" placeholder="Angola"></label>
+            <label>Status<select id="supplierStatus" required><option value="ativo">Ativo</option><option value="inativo">Inativo</option><option value="bloqueado">Bloqueado</option></select></label>
+            <label class="full">Observações<textarea id="supplierNotes" rows="4" maxlength="800" placeholder="Condições, prazos, áreas de fornecimento ou notas internas"></textarea></label>
             <div class="form-actions full">
-              <button class="button button--primary" type="submit" id="submitProduct">Salvar produto</button>
-              <button class="button button--secondary" type="button" id="cancelEdit">Limpar formulário</button>
+              <button class="button button--primary" type="submit" id="submitSupplier">Salvar fornecedor</button>
+              <button class="button button--secondary" type="button" id="cancelSupplierEdit">Limpar formulário</button>
             </div>
           </form>
-          <div id="formMessage" class="message" role="status"></div>
+          <div id="supplierFormMessage" class="message" role="status"></div>
+        </section>
+
+        <section class="panel" id="suppliers" aria-labelledby="suppliers-title">
+          <div class="section-heading"><p class="eyebrow">Lista de fornecedores</p><h2 id="suppliers-title">Fornecedores da empresa</h2></div>
+          <div class="toolbar"><input id="supplierSearchName" placeholder="Pesquisar por nome"><input id="supplierSearchPhone" placeholder="Pesquisar por telefone"><select id="supplierCategoryFilter"></select><select id="sortSuppliers"><option value="nome_empresa">Ordenar por nome</option><option value="telefone">Ordenar por telefone</option><option value="status">Ordenar por status</option><option value="data_criacao">Ordenar por data</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>Fornecedor</th><th>Responsável</th><th>Telefone</th><th>Email</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody id="suppliersTable"></tbody></table></div>
+        </section>
+
+        <section class="panel" id="supplier-profile" aria-labelledby="supplier-profile-title">
+          <div class="section-heading"><p class="eyebrow">Perfil detalhado</p><h2 id="supplier-profile-title">Detalhes do fornecedor</h2><p id="supplierProfileHint">Selecione “Detalhes” na lista para consultar dados cadastrais, contactos e espaço preparado para compras futuras.</p></div>
+          <div id="supplierProfile" class="profile-grid"></div>
+        </section>
+
+        <section class="panel" id="supplier-categories" aria-labelledby="supplier-categories-title">
+          <div class="section-heading"><p class="eyebrow">Categorias</p><h2 id="supplier-categories-title">Categorias de fornecedores</h2></div>
+          <form id="supplierCategoryForm" class="category-form"><input type="hidden" id="supplierCategoryEditId"><input id="supplierCategoryName" required maxlength="120" placeholder="Ex.: Distribuidor alimentar"><input id="supplierCategoryDescription" maxlength="240" placeholder="Descrição"><button class="button button--primary" type="submit">Salvar categoria</button><button class="button button--secondary" type="button" id="cancelSupplierCategoryEdit">Cancelar</button></form>
+          <div id="supplierCategoriesList" class="cards-grid"></div>
         </section>
 
         <section class="panel" id="products" aria-labelledby="products-title">
-          <div class="section-heading">
-            <p class="eyebrow">Lista de produtos</p>
-            <h2 id="products-title">Produtos da empresa</h2>
-          </div>
-          <div class="toolbar">
-            <input id="searchName" placeholder="Pesquisar por nome">
-            <input id="searchCode" placeholder="Pesquisar por código">
-            <select id="categoryFilter"></select>
-            <select id="sortProducts"><option value="nome">Ordenar por nome</option><option value="codigo_produto">Ordenar por código</option><option value="quantidade_estoque">Ordenar por estoque</option><option value="preco_venda">Ordenar por preço</option></select>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Nome</th><th>Código</th><th>Categoria</th><th>Qtd.</th><th>Preço venda</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="productsTable"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="panel" id="categories" aria-labelledby="categories-title">
-          <div class="section-heading">
-            <p class="eyebrow">Categorias</p>
-            <h2 id="categories-title">Gestão de categorias</h2>
-          </div>
-          <form id="categoryForm" class="category-form">
-            <input type="hidden" id="categoryEditId">
-            <input id="categoryName" required maxlength="120" placeholder="Nome da categoria">
-            <input id="categoryDescription" maxlength="240" placeholder="Descrição">
-            <button class="button button--primary" type="submit">Salvar categoria</button>
-            <button class="button button--secondary" type="button" id="cancelCategoryEdit">Cancelar</button>
-          </form>
-          <div id="categoriesList" class="cards-grid"></div>
+          <div class="section-heading"><p class="eyebrow">Integração com produtos</p><h2 id="products-title">Produtos preparados para fornecedor principal</h2><p>O vínculo usa <strong>fornecedor_id</strong> validado por empresa. Múltiplos fornecedores ficam preparados no banco para evolução futura.</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Código</th><th>Fornecedor principal</th><th>Status</th></tr></thead><tbody id="productsTable"></tbody></table></div>
         </section>
 
         <section class="panel audit" aria-labelledby="audit-title">
