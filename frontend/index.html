@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zero Fake News | Dashboard de Credibilidade</title>
+  <title>JPM Stock | Cadastro de Produtos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -11,215 +11,122 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="dashboard-sidebar" aria-label="Dashboard Zero Fake News">
-      <a class="brand brand--sidebar" href="#top" aria-label="Página inicial Zero Fake News">
-        <span class="brand__mark">ZFN</span>
-        <span>
-          Zero Fake News
-          <small>Monitor de credibilidade</small>
-        </span>
+    <aside class="sidebar" aria-label="Navegação JPM Stock">
+      <a class="brand" href="#dashboard" aria-label="JPM Stock">
+        <span class="brand__mark">JPM</span>
+        <span>JPM Stock<small>Gestão multiempresa</small></span>
       </a>
-
-      <section class="sidebar-card metric-card" aria-labelledby="total-analyses-title">
-        <p class="eyebrow">Dashboard</p>
-        <h2 id="total-analyses-title">Total de análises</h2>
-        <strong>12 486</strong>
-        <span>simulação acumulada do MVP</span>
-      </section>
-
-      <nav class="sidebar-card history-card" aria-labelledby="history-title">
-        <div class="history-card__header">
-          <p class="eyebrow">Histórico</p>
-          <h2 id="history-title">Análises recentes</h2>
-        </div>
-        <a class="history-item history-item--active" href="#analysis" aria-current="true" aria-label="Abrir análise sobre subsídio viral">
-          <span class="history-item__status history-item__status--danger"></span>
-          <span>
-            Subsídio viral no WhatsApp
-            <small>Muito baixa · há 8 min</small>
-          </span>
-        </a>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre comunicado público">
-          <span class="history-item__status history-item__status--success"></span>
-          <span>
-            Comunicado institucional
-            <small>Alta · há 22 min</small>
-          </span>
-        </a>
-        <a class="history-item" href="#analysis" aria-label="Abrir análise sobre alerta de saúde">
-          <span class="history-item__status history-item__status--warning"></span>
-          <span>
-            Alerta de saúde sem fonte
-            <small>Baixa · hoje</small>
-          </span>
-        </a>
+      <nav class="nav-card">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#products">Produtos</a>
+        <a href="#product-form-section">Cadastrar produto</a>
+        <a href="#categories">Categorias</a>
       </nav>
-
-      <a class="sidebar-cta" href="#criteria">Ver critérios oficiais</a>
+      <section class="tenant-card" aria-labelledby="tenant-title">
+        <p class="eyebrow">Empresa ativa</p>
+        <h2 id="tenant-title">Sessão segura</h2>
+        <select id="companySwitcher" aria-label="Alternar empresa para simulação multiempresa"></select>
+        <p>Todos os produtos e categorias são filtrados pelo <strong>empresa_id</strong> autenticado.</p>
+      </section>
     </aside>
 
     <div class="page-content">
-      <header class="hero" id="top">
-        <nav class="topbar" aria-label="Navegação principal">
-          <a class="brand" href="#top" aria-label="Página inicial Zero Fake News">
-            <span class="brand__mark">ZFN</span>
-            <span>Zero Fake News</span>
-          </a>
-          <div class="topbar__links">
-            <a class="topbar__link" href="#analysis">Analisar notícia</a>
-            <a class="topbar__link" href="#diagnostics">Diagnóstico</a>
-          </div>
-        </nav>
-
-        <section class="hero__content">
-          <p class="eyebrow">MVP para Angola</p>
-          <h1>Centro profissional de análise contra desinformação.</h1>
-          <p class="hero__text">
-            Simule uma avaliação de credibilidade com pontuação de 0 a 100,
-            classificação oficial e diagnóstico separado entre sinais de risco e sinais positivos.
-          </p>
-          <div class="hero__actions">
-            <a class="button button--primary" href="#analysis">Começar análise</a>
-            <a class="button button--ghost" href="#criteria">Ver escala oficial</a>
-          </div>
-        </section>
+      <header class="hero" id="dashboard">
+        <div>
+          <p class="eyebrow">Módulo 2</p>
+          <h1>Cadastro de Produtos</h1>
+          <p>Organize produtos, categorias, preços e estoque mínimo com isolamento total entre empresas.</p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button--primary" href="#product-form-section">Novo produto</a>
+          <a class="button button--secondary" href="#categories">Gerir categorias</a>
+        </div>
       </header>
 
       <main>
-        <section class="panel analysis" id="analysis" aria-labelledby="analysis-title">
-          <div class="section-heading">
-            <p class="eyebrow">Análise rápida</p>
-            <h2 id="analysis-title">Cole o texto da notícia</h2>
-            <p>
-              O resultado é uma simulação educativa. Confirme sempre com fontes oficiais,
-              órgãos de comunicação credíveis e verificadores independentes.
-            </p>
-          </div>
+        <section class="metrics-grid" aria-label="Resumo do estoque">
+          <article class="metric"><span>Total de produtos</span><strong id="totalProducts">0</strong></article>
+          <article class="metric"><span>Baixo estoque</span><strong id="lowStockProducts">0</strong></article>
+          <article class="metric"><span>Categorias</span><strong id="totalCategories">0</strong></article>
+          <article class="metric"><span>Valor de venda</span><strong id="stockValue">Kz 0</strong></article>
+        </section>
 
-          <form class="analysis-form" id="analysisForm">
-            <label for="newsInput">Texto para análise</label>
-            <textarea
-              id="newsInput"
-              name="newsInput"
-              rows="10"
-              minlength="30"
-              placeholder="Ex.: O Governo anunciou uma nova medida..."
-              required
-            ></textarea>
-            <div class="form-actions">
-              <button class="button button--primary" type="submit">Verificar notícia</button>
-              <button class="button button--secondary" type="button" id="clearButton">Limpar</button>
+        <section class="panel" id="product-form-section" aria-labelledby="product-form-title">
+          <div class="section-heading">
+            <p class="eyebrow">Cadastro e edição</p>
+            <h2 id="product-form-title">Dados do produto</h2>
+            <p>Campos validados, código interno único por empresa e vínculo obrigatório ao escopo da empresa ativa.</p>
+          </div>
+          <form id="productForm" class="form-grid">
+            <input type="hidden" id="productId">
+            <label>Nome do produto<input id="productName" required maxlength="160" placeholder="Ex.: Arroz agulha 5kg"></label>
+            <label>Código interno<input id="productCode" required maxlength="80" placeholder="PRD-001"></label>
+            <label>Código de barras<input id="barcode" maxlength="80" inputmode="numeric" placeholder="5600000000000"></label>
+            <label>Categoria<select id="categoryId" required></select></label>
+            <label>Unidade de medida<select id="unit" required><option>un</option><option>kg</option><option>g</option><option>l</option><option>ml</option><option>cx</option><option>pct</option></select></label>
+            <label>Fornecedor principal<input id="supplier" maxlength="120" placeholder="Fornecedor"></label>
+            <label>Preço de compra<input id="purchasePrice" required type="number" min="0" step="0.01"></label>
+            <label>Preço de venda<input id="salePrice" required type="number" min="0" step="0.01"></label>
+            <label>Quantidade inicial em estoque<input id="stockQuantity" required type="number" min="0" step="0.001"></label>
+            <label>Estoque mínimo<input id="minimumStock" required type="number" min="0" step="0.001"></label>
+            <label class="full">Descrição<textarea id="description" rows="4" maxlength="600" placeholder="Descrição, variações, marca ou observações"></textarea></label>
+            <div class="form-actions full">
+              <button class="button button--primary" type="submit" id="submitProduct">Salvar produto</button>
+              <button class="button button--secondary" type="button" id="cancelEdit">Limpar formulário</button>
             </div>
           </form>
-
-          <aside class="result-card" id="resultCard" aria-live="polite" aria-label="Área de resultados da verificação">
-            <div class="result-card__empty">
-              <div class="score-preview" aria-label="Pré-visualização do score de credibilidade">
-                <span class="result-card__icon" aria-hidden="true">🛡️</span>
-                <div class="score-preview__number">
-                  <span>72</span>
-                  <small>/100</small>
-                </div>
-                <div class="progress-track" aria-hidden="true">
-                  <span class="progress-fill" style="--score-width: 72%;"></span>
-                </div>
-                <strong>Score de Credibilidade</strong>
-              </div>
-              <h3>Resultado aparecerá aqui</h3>
-              <p>Ao clicar em verificar, verá o score de 0 a 100, a barra de progresso e a classificação de confiabilidade correspondente.</p>
-            </div>
-          </aside>
+          <div id="formMessage" class="message" role="status"></div>
         </section>
 
-        <section class="classification-board" id="criteria" aria-labelledby="criteria-title">
-          <div class="section-heading section-heading--center">
-            <p class="eyebrow">Escala oficial</p>
-            <h2 id="criteria-title">Classificações de confiabilidade</h2>
-            <p>O score é apresentado numa escala de 0 a 100 para apoiar decisões rápidas antes da partilha.</p>
+        <section class="panel" id="products" aria-labelledby="products-title">
+          <div class="section-heading">
+            <p class="eyebrow">Lista de produtos</p>
+            <h2 id="products-title">Produtos da empresa</h2>
           </div>
-
-          <div class="score-scale-overview" aria-label="Resumo visual do score de credibilidade">
-            <div>
-              <span class="score-scale-overview__label">Score de Credibilidade</span>
-              <strong>0–100</strong>
-            </div>
-            <div class="progress-track" aria-hidden="true">
-              <span class="progress-fill" style="--score-width: 100%;"></span>
-            </div>
-            <p>Quanto maior o score, maior a presença de fontes, contexto, linguagem neutra e elementos verificáveis.</p>
+          <div class="toolbar">
+            <input id="searchName" placeholder="Pesquisar por nome">
+            <input id="searchCode" placeholder="Pesquisar por código">
+            <select id="categoryFilter"></select>
+            <select id="sortProducts"><option value="nome">Ordenar por nome</option><option value="codigo_produto">Ordenar por código</option><option value="quantidade_estoque">Ordenar por estoque</option><option value="preco_venda">Ordenar por preço</option></select>
           </div>
-
-          <div class="scale-grid" aria-label="Cinco classificações oficiais de confiabilidade">
-            <article class="scale-card scale-card--high">
-              <span>81–100</span>
-              <h3>Alta Confiabilidade</h3>
-              <p>Conteúdo com fontes, contexto, datas e baixo risco de manipulação.</p>
-            </article>
-            <article class="scale-card scale-card--good">
-              <span>61–80</span>
-              <h3>Boa Confiabilidade</h3>
-              <p>Predominam sinais positivos, mas recomenda-se uma confirmação complementar.</p>
-            </article>
-            <article class="scale-card scale-card--medium">
-              <span>41–60</span>
-              <h3>Média Confiabilidade</h3>
-              <p>Há elementos úteis misturados com lacunas que exigem verificação independente.</p>
-            </article>
-            <article class="scale-card scale-card--low">
-              <span>21–40</span>
-              <h3>Baixa Confiabilidade</h3>
-              <p>O texto apresenta lacunas relevantes ou linguagem que reduz a confiança.</p>
-            </article>
-            <article class="scale-card scale-card--critical">
-              <span>0–20</span>
-              <h3>Muito Baixa Confiabilidade</h3>
-              <p>Alta probabilidade de rumor, falta de fontes ou apelos virais suspeitos.</p>
-            </article>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>Código</th><th>Categoria</th><th>Qtd.</th><th>Preço venda</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="productsTable"></tbody>
+            </table>
           </div>
         </section>
 
-        <section class="diagnostics" id="diagnostics" aria-labelledby="diagnostics-title">
-          <div class="section-heading section-heading--center">
-            <p class="eyebrow">Diagnóstico</p>
-            <h2 id="diagnostics-title">Leitura separada dos sinais encontrados</h2>
+        <section class="panel" id="categories" aria-labelledby="categories-title">
+          <div class="section-heading">
+            <p class="eyebrow">Categorias</p>
+            <h2 id="categories-title">Gestão de categorias</h2>
           </div>
+          <form id="categoryForm" class="category-form">
+            <input type="hidden" id="categoryEditId">
+            <input id="categoryName" required maxlength="120" placeholder="Nome da categoria">
+            <input id="categoryDescription" maxlength="240" placeholder="Descrição">
+            <button class="button button--primary" type="submit">Salvar categoria</button>
+            <button class="button button--secondary" type="button" id="cancelCategoryEdit">Cancelar</button>
+          </form>
+          <div id="categoriesList" class="cards-grid"></div>
+        </section>
 
-          <div class="diagnostics-grid">
-            <article class="diagnostic-card diagnostic-card--risk">
-              <div class="diagnostic-card__icon" aria-hidden="true">⚠️</div>
-              <div>
-                <p class="eyebrow">Risco detetado</p>
-                <h3>Sinais de Desinformação Detetados</h3>
-                <ul>
-                  <li><strong>Sensacionalismo:</strong> urgência extrema, choque, medo ou chamadas para partilha imediata.</li>
-                  <li><strong>Falta de fontes:</strong> ausência de instituição, autor, data, ligação ou documento verificável.</li>
-                  <li><strong>Promessas suspeitas:</strong> prémios, subsídios ou benefícios sem canal oficial confirmado.</li>
-                </ul>
-              </div>
-            </article>
-
-            <article class="diagnostic-card diagnostic-card--positive">
-              <div class="diagnostic-card__icon" aria-hidden="true">✅</div>
-              <div>
-                <p class="eyebrow">Confiança</p>
-                <h3>Sinais Positivos Encontrados</h3>
-                <ul>
-                  <li><strong>Fontes identificáveis:</strong> referências a órgãos oficiais, meios credíveis ou relatórios.</li>
-                  <li><strong>Contexto suficiente:</strong> datas, locais, entidades e explicações verificáveis.</li>
-                  <li><strong>Linguagem neutra:</strong> informação apresentada sem alarmismo nem pressão para viralizar.</li>
-                </ul>
-              </div>
-            </article>
-          </div>
+        <section class="panel audit" aria-labelledby="audit-title">
+          <div class="section-heading"><p class="eyebrow">Auditoria</p><h2 id="audit-title">Alterações importantes</h2></div>
+          <ul id="changeLog"></ul>
         </section>
       </main>
-
-      <footer class="footer">
-        <p>Zero Fake News — protótipo inicial para literacia mediática e verificação de informação.</p>
-      </footer>
     </div>
   </div>
 
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">Confirmar exclusão</h2>
+      <p id="confirmText"></p>
+      <div class="form-actions"><button class="button button--danger" id="confirmDelete">Excluir</button><button class="button button--secondary" id="cancelDelete">Cancelar</button></div>
+    </div>
+  </div>
   <script src="../script.js"></script>
 </body>
 </html>

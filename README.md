@@ -1,75 +1,59 @@
-# Zero Fake News
+# JPM Stock — Módulo 2: Cadastro de Produtos
 
-Zero Fake News é uma plataforma em fase de MVP focada em combater a desinformação em Angola. A proposta inicial é oferecer uma interface web leve, responsiva e acessível para apoiar utilizadores na análise preliminar de notícias, mensagens virais e publicações partilhadas em redes sociais.
+JPM Stock é uma plataforma web SaaS multiempresa para gestão inteligente de estoque da JPM Tech Solutions. Este módulo implementa cadastro, categorias, consulta, edição e exclusão segura de produtos, respeitando o isolamento por empresa iniciado no módulo de autenticação e dashboard.
 
-> **Nota:** esta versão não substitui uma verificação jornalística profissional. O MVP simula critérios de validação para demonstrar o fluxo de produto e preparar futuras integrações com bases de dados, serviços de fact-checking e modelos de IA.
+## Arquitetura escolhida
 
-## Objetivos do MVP
+A implementação usa uma arquitetura front-end modular em HTML, CSS e JavaScript puro para demonstrar o fluxo funcional completo sem dependências externas. A camada de domínio mantém produtos e categorias sempre associados ao `empresa_id` da sessão ativa. A interface renderiza apenas dados filtrados pela empresa autenticada e todas as operações de criar, editar, remover e listar validam essa associação antes de alterar o estado.
 
-- Permitir que o utilizador cole ou escreva uma notícia para análise.
-- Simular uma avaliação de credibilidade com critérios transparentes.
-- Apresentar recomendações práticas para verificação adicional.
-- Manter a aplicação simples, rápida e executável diretamente no navegador.
-- Criar uma base técnica fácil de evoluir para integrações reais no futuro.
+Em produção, a mesma separação deve existir no backend: autenticação identifica a empresa ativa, repositórios aplicam `WHERE empresa_id = :empresa_id` e o banco usa chaves estrangeiras e índices compostos por empresa para impedir colisões entre tenants.
 
-## Plano de ficheiros
+## Estrutura de pastas
 
 ```text
 zero-fake-news/
-├── index.html   # Estrutura da interface de utilizador e conteúdo principal
-├── style.css    # Design visual, layout responsivo e estados dos resultados
-├── script.js    # Processamento do texto e simulação dos critérios de validação
-└── README.md    # Documentação da arquitetura inicial do MVP
+├── database/
+│   └── schema.sql              # Modelo relacional das tabelas produtos e categorias
+├── docs/
+│   └── architecture.md         # Explicação técnica do módulo multiempresa
+├── frontend/
+│   ├── index.html              # Interface web do JPM Stock
+│   └── style.css               # Design responsivo e componentes reutilizáveis
+├── index.html                  # Entrada estática alternativa na raiz
+├── script.js                   # Estado, validações, CRUD e segurança por empresa
+└── README.md                   # Documentação do módulo
 ```
 
-## Arquitetura inicial
+## Modelo do banco de dados
 
-A arquitetura inicial foi desenhada como uma aplicação estática de front-end para reduzir dependências e acelerar a validação da experiência de uso.
+### `categorias`
 
-### 1. Camada de interface — `index.html`
+- `id`: chave primária.
+- `empresa_id`: empresa proprietária da categoria.
+- `nome`: nome único por empresa.
+- `descricao`: descrição opcional.
+- `data_criacao`: data de criação.
 
-Responsável por organizar a experiência do utilizador:
+### `produtos`
 
-- Cabeçalho com proposta de valor da plataforma.
-- Formulário com campo de texto para inserir a notícia.
-- Botão para executar a análise e botão para limpar os dados.
-- Área de resultado com pontuação de credibilidade.
-- Lista de critérios avaliados e recomendações de próximos passos.
+- `id`: chave primária.
+- `empresa_id`: empresa proprietária do produto.
+- `categoria_id`: categoria da mesma empresa.
+- `fornecedor_id`: fornecedor principal, preparado para integração futura.
+- `nome`, `codigo_produto`, `codigo_barras`, `descricao`, `unidade_medida`.
+- `preco_compra`, `preco_venda`, `quantidade_estoque`, `estoque_minimo`.
+- `data_criacao`, `data_atualizacao`.
 
-### 2. Camada visual — `style.css`
+## Funcionalidades entregues
 
-Responsável por garantir uma apresentação limpa e profissional:
+- Cadastro completo de produtos.
+- CRUD de categorias.
+- Lista com pesquisa por nome e código, filtro por categoria e ordenação.
+- Edição de produto com registro de alterações importantes.
+- Exclusão segura com confirmação e estrutura preparada para soft delete.
+- Controle multiempresa no estado da aplicação e nas recomendações de schema.
+- Interface responsiva para desktop e celular.
 
-- Layout responsivo para telemóveis, tablets e desktop.
-- Paleta visual sóbria, associada a confiança e informação pública.
-- Cartões para destacar métricas, critérios e recomendações.
-- Estados visuais para risco baixo, médio e alto.
+## Como executar
 
-### 3. Camada de lógica — `script.js`
-
-Responsável por processar a entrada do utilizador no navegador:
-
-- Valida se há texto suficiente para análise.
-- Calcula uma pontuação simulada de credibilidade.
-- Avalia sinais como comprimento do texto, linguagem sensacionalista, presença de fontes, datas, links e termos verificáveis.
-- Gera uma classificação resumida e recomendações de verificação.
-
-## Critérios simulados de validação
-
-O MVP usa regras simples e transparentes para demonstrar como a plataforma pode evoluir:
-
-| Critério | O que observa | Impacto esperado |
-| --- | --- | --- |
-| Clareza do conteúdo | Texto com contexto suficiente | Aumenta a confiança |
-| Indicação de fonte | Menções a entidades, links ou referências | Aumenta a confiança |
-| Linguagem sensacionalista | Uso de urgência, choque ou chamadas virais | Reduz a confiança |
-| Presença de datas | Indícios temporais para contextualização | Aumenta a confiança |
-| Termos verificáveis | Lugares, instituições e factos concretos | Aumenta a confiança |
-
-## Próximos passos sugeridos
-
-- Integrar APIs de fact-checking e fontes oficiais de Angola.
-- Criar um backend para histórico de análises e auditoria de resultados.
-- Adicionar modelos de IA para classificação semântica e deteção de padrões de manipulação.
-- Suportar upload de imagens e análise de publicações multimédia.
-- Incluir localização em português de Angola e exemplos adaptados ao contexto nacional.
+Abra `frontend/index.html` no navegador ou sirva a pasta com um servidor estático simples.

@@ -1,106 +1,132 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-AO">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Fake News - Portal de Credibilidade de Angola</title>
-    <link rel="stylesheet" href="estilo.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPM Stock | Cadastro de Produtos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegação JPM Stock">
+      <a class="brand" href="#dashboard" aria-label="JPM Stock">
+        <span class="brand__mark">JPM</span>
+        <span>JPM Stock<small>Gestão multiempresa</small></span>
+      </a>
+      <nav class="nav-card">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#products">Produtos</a>
+        <a href="#product-form-section">Cadastrar produto</a>
+        <a href="#categories">Categorias</a>
+      </nav>
+      <section class="tenant-card" aria-labelledby="tenant-title">
+        <p class="eyebrow">Empresa ativa</p>
+        <h2 id="tenant-title">Sessão segura</h2>
+        <select id="companySwitcher" aria-label="Alternar empresa para simulação multiempresa"></select>
+        <p>Todos os produtos e categorias são filtrados pelo <strong>empresa_id</strong> autenticado.</p>
+      </section>
+    </aside>
 
-    <div class="app-container" style="display: flex; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0;">
-        
-        <aside class="sidebar" style="width: 320px; background-color: #1e293b; color: #fff; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #cbd5e1;">
-            <div class="brand" style="margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 15px;">
-                <h2 style="margin: 0; color: #38bdf8; font-size: 22px;">Zero Fake News</h2>
-                <small style="color: #94a3b8;">Plataforma de Utilidade Pública</small>
+    <div class="page-content">
+      <header class="hero" id="dashboard">
+        <div>
+          <p class="eyebrow">Módulo 2</p>
+          <h1>Cadastro de Produtos</h1>
+          <p>Organize produtos, categorias, preços e estoque mínimo com isolamento total entre empresas.</p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button--primary" href="#product-form-section">Novo produto</a>
+          <a class="button button--secondary" href="#categories">Gerir categorias</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="metrics-grid" aria-label="Resumo do estoque">
+          <article class="metric"><span>Total de produtos</span><strong id="totalProducts">0</strong></article>
+          <article class="metric"><span>Baixo estoque</span><strong id="lowStockProducts">0</strong></article>
+          <article class="metric"><span>Categorias</span><strong id="totalCategories">0</strong></article>
+          <article class="metric"><span>Valor de venda</span><strong id="stockValue">Kz 0</strong></article>
+        </section>
+
+        <section class="panel" id="product-form-section" aria-labelledby="product-form-title">
+          <div class="section-heading">
+            <p class="eyebrow">Cadastro e edição</p>
+            <h2 id="product-form-title">Dados do produto</h2>
+            <p>Campos validados, código interno único por empresa e vínculo obrigatório ao escopo da empresa ativa.</p>
+          </div>
+          <form id="productForm" class="form-grid">
+            <input type="hidden" id="productId">
+            <label>Nome do produto<input id="productName" required maxlength="160" placeholder="Ex.: Arroz agulha 5kg"></label>
+            <label>Código interno<input id="productCode" required maxlength="80" placeholder="PRD-001"></label>
+            <label>Código de barras<input id="barcode" maxlength="80" inputmode="numeric" placeholder="5600000000000"></label>
+            <label>Categoria<select id="categoryId" required></select></label>
+            <label>Unidade de medida<select id="unit" required><option>un</option><option>kg</option><option>g</option><option>l</option><option>ml</option><option>cx</option><option>pct</option></select></label>
+            <label>Fornecedor principal<input id="supplier" maxlength="120" placeholder="Fornecedor"></label>
+            <label>Preço de compra<input id="purchasePrice" required type="number" min="0" step="0.01"></label>
+            <label>Preço de venda<input id="salePrice" required type="number" min="0" step="0.01"></label>
+            <label>Quantidade inicial em estoque<input id="stockQuantity" required type="number" min="0" step="0.001"></label>
+            <label>Estoque mínimo<input id="minimumStock" required type="number" min="0" step="0.001"></label>
+            <label class="full">Descrição<textarea id="description" rows="4" maxlength="600" placeholder="Descrição, variações, marca ou observações"></textarea></label>
+            <div class="form-actions full">
+              <button class="button button--primary" type="submit" id="submitProduct">Salvar produto</button>
+              <button class="button button--secondary" type="button" id="cancelEdit">Limpar formulário</button>
             </div>
+          </form>
+          <div id="formMessage" class="message" role="status"></div>
+        </section>
 
-            <div class="stats-box" style="background-color: #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center;">
-                <div>
-                    <div id="totalAnalysesCount" style="font-size: 24px; font-weight: bold; color: #38bdf8;">3</div>
-                    <small style="color: #cbd5e1; font-size: 11px;">Análises Totais</small>
-                </div>
-                <div style="border-left: 1px solid #475569;"></div>
-                <div>
-                    <div id="averageCredibility" style="font-size: 24px; font-weight: bold; color: #34d399;">44/100</div>
-                    <small style="color: #cbd5e1; font-size: 11px;">Média Score</small>
-                </div>
-            </div>
+        <section class="panel" id="products" aria-labelledby="products-title">
+          <div class="section-heading">
+            <p class="eyebrow">Lista de produtos</p>
+            <h2 id="products-title">Produtos da empresa</h2>
+          </div>
+          <div class="toolbar">
+            <input id="searchName" placeholder="Pesquisar por nome">
+            <input id="searchCode" placeholder="Pesquisar por código">
+            <select id="categoryFilter"></select>
+            <select id="sortProducts"><option value="nome">Ordenar por nome</option><option value="codigo_produto">Ordenar por código</option><option value="quantidade_estoque">Ordenar por estoque</option><option value="preco_venda">Ordenar por preço</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>Código</th><th>Categoria</th><th>Qtd.</th><th>Preço venda</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="productsTable"></tbody>
+            </table>
+          </div>
+        </section>
 
-            <div class="search-box" style="margin-bottom: 15px;">
-                <input type="text" id="searchHistory" placeholder="Pesquisar análises passadas..." style="width: 100%; padding: 10px; border-radius: 6px; border: none; background-color: #334155; color: #fff; box-sizing: border-box;">
-            </div>
+        <section class="panel" id="categories" aria-labelledby="categories-title">
+          <div class="section-heading">
+            <p class="eyebrow">Categorias</p>
+            <h2 id="categories-title">Gestão de categorias</h2>
+          </div>
+          <form id="categoryForm" class="category-form">
+            <input type="hidden" id="categoryEditId">
+            <input id="categoryName" required maxlength="120" placeholder="Nome da categoria">
+            <input id="categoryDescription" maxlength="240" placeholder="Descrição">
+            <button class="button button--primary" type="submit">Salvar categoria</button>
+            <button class="button button--secondary" type="button" id="cancelCategoryEdit">Cancelar</button>
+          </form>
+          <div id="categoriesList" class="cards-grid"></div>
+        </section>
 
-            <h4 style="margin: 10px 0; color: #94a3b8; font-size: 14px; text-transform: uppercase;">Histórico Recente</h4>
-            <ul id="historyList" style="padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #0f172a; border-radius: 6px;">
-                </ul>
-        </aside>
-
-        <main class="main-content" style="flex-grow: 1; padding: 40px; box-sizing: border-box; max-width: 900px; margin: 0 auto;">
-            
-            <header style="margin-bottom: 30px;">
-                <h1 style="color: #0f172a; margin: 0 0 10px 0; font-size: 28px;">Verificador de Integridade de Conteúdo</h1>
-                <p style="color: #64748b; margin: 0;">Cole o texto de mensagens de redes sociais ou links suspeitos para auditoria analítica instantânea.</p>
-            </header>
-
-            <section class="input-section" style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                <form id="analysisForm">
-                    <label for="newsInput" style="display: block; font-weight: bold; color: #1e293b; margin-bottom: 10px;">Texto da Notícia ou Mensagem:</label>
-                    <textarea id="newsInput" rows="6" placeholder="Exemplo: Cole o boato sobre bónus do governo ou vagas de emprego suspeitas aqui..." style="width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; resize: vertical; box-sizing: border-box; margin-bottom: 15px;"></textarea>
-                    
-                    <button type="submit" style="background-color: #0284c7; color: #fff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; width: 100%;">
-                        Verificar Autenticidade
-                    </button>
-                </form>
-            </section>
-
-            <div id="loadingSpinner" class="loading" style="display: none; text-align: center; margin: 30px 0;">
-                <div class="spinner" style="border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #0284c7; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                <p style="color: #0284c7; font-weight: bold; margin-top: 10px;">A processar heurísticas de inteligência e base de conhecimento...</p>
-            </div>
-
-            <section id="resultCard" class="result-section" style="display: none; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-top: 30px;">
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
-                    <div>
-                        <h3 style="margin: 0; color: #0f172a; font-size: 20px;">Resultado da Auditoria</h3>
-                        <span id="levelBadge" style="display: inline-block; padding: 6px 12px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: bold; margin-top: 5px;">Análise Concluída</span>
-                    </div>
-                    <div id="scoreValue" style="font-size: 32px; font-weight: bold; color: #1e293b;">--/100</div>
-                </div>
-
-                <div style="background-color: #e2e8f0; border-radius: 10px; height: 12px; width: 100%; margin-bottom: 25px; overflow: hidden;">
-                    <div id="progressBar" style="width: 0%; height: 100%; background-color: #cbd5e1; transition: width 0.5s ease;"></div>
-                </div>
-
-                <div style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-left: 4px solid #0284c7; border-radius: 0 4px 4px 0;">
-                    <strong style="display: block; color: #0f172a; margin-bottom: 5px;">Explicação da Análise:</strong>
-                    <p id="explanationText" style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;"></p>
-                </div>
-
-                <div class="diagnostics-grid" style="display: flex; gap: 20px;">
-                    <div style="flex: 1; background: #fff5f5; border: 1px solid #feb2b2; padding: 15px; border-radius: 6px;">
-                        <h4 style="margin: 0 0 10px 0; color: #9b2c2c; font-size: 15px;">🚨 Sinais de Desinformação</h4>
-                        <ul id="negativeList" style="padding-left: 0; margin: 0; font-size: 13px; line-height: 1.6;">
-                            </ul>
-                    </div>
-                    <div style="flex: 1; background: #f0fff4; border: 1px solid #9ae6b4; padding: 15px; border-radius: 6px;">
-                        <h4 style="margin: 0 0 10px 0; color: #22543d; font-size: 15px;">🛡️ Indicadores Positivos</h4>
-                        <ul id="positiveList" style="padding-left: 0; margin: 0; font-size: 13px; line-height: 1.6;">
-                            </ul>
-                    </div>
-                </div>
-
-            </section>
-        </main>
+        <section class="panel audit" aria-labelledby="audit-title">
+          <div class="section-heading"><p class="eyebrow">Auditoria</p><h2 id="audit-title">Alterações importantes</h2></div>
+          <ul id="changeLog"></ul>
+        </section>
+      </main>
     </div>
+  </div>
 
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">Confirmar exclusão</h2>
+      <p id="confirmText"></p>
+      <div class="form-actions"><button class="button button--danger" id="confirmDelete">Excluir</button><button class="button button--secondary" id="cancelDelete">Cancelar</button></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
